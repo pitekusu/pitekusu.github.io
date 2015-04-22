@@ -694,6 +694,7 @@ td {
 .icon-star:before {
   content: "\e62d";
 }
+@import url("//fonts.googleapis.com/css?family=Open+Sans:400,700");
 .post pre,
 .post .highlight {
   background: #1d1f21;
@@ -1149,7 +1150,7 @@ input.menu-search-input {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #6e67c3;
+  background: #b3e8ff;
 }
 .sidebar-nav {
   margin: 0;
