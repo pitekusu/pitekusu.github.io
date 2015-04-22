@@ -185,7 +185,7 @@ th {
 }
 body {
   position: relative;
-  font-family: Lato, "Microsoft Jhenghei", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-family: Lato, 'Open Sans', 'Helvetica Neue', 'Helvetica', 'Arial', '�q���M�m�p�S Pro W3', 'Hiragino Kaku Gothic Pro', '���C���I', Meiryo, '�l�r �o�S�V�b�N', 'MS PGothic', sans-serif, sans-serif;
   font-size: 16px;
   line-height: 1.8;
   color: #555;
@@ -211,7 +211,7 @@ h6 {
   padding: 0;
   font-weight: bold;
   line-height: 1;
-  font-family: Cambria, Georgia, "Microsoft Jhenghei", "Hiragino Sans GB", "Microsoft YaHei", "Times New Roman", serif;
+  font-family: Cambria, Georgia, 'Open Sans', 'Helvetica Neue', 'Helvetica', 'Arial', '�q���M�m�p�S Pro W3', 'Hiragino Kaku Gothic Pro', '���C���I', Meiryo, '�l�r �o�S�V�b�N', 'MS PGothic', sans-serif, "Times New Roman", serif;
 }
 h1 {
   font-size: 26px;
@@ -793,7 +793,7 @@ td {
 .post .gist .gist-file .gist-meta {
   background: #1d1f21;
   color: #969896;
-  font: 13px Lato, "Microsoft Jhenghei", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font: 13px Lato, 'Open Sans', 'Helvetica Neue', 'Helvetica', 'Arial', '�q���M�m�p�S Pro W3', 'Hiragino Kaku Gothic Pro', '���C���I', Meiryo, '�l�r �o�S�V�b�N', 'MS PGothic', sans-serif, sans-serif;
   text-shadow: 0 0;
   padding: 0;
   margin-top: 1em;
@@ -929,7 +929,7 @@ body {
   color: #fff;
   background: #222;
   border-bottom: none;
-  font-family: Lato, "Microsoft Jhenghei", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-family: Lato, 'Open Sans', 'Helvetica Neue', 'Helvetica', 'Arial', '�q���M�m�p�S Pro W3', 'Hiragino Kaku Gothic Pro', '���C���I', Meiryo, '�l�r �o�S�V�b�N', 'MS PGothic', sans-serif, sans-serif;
 }
 .logo {
   display: inline-block;
@@ -1150,7 +1150,7 @@ input.menu-search-input {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #b3e8ff;
+  background: #e43247;
 }
 .sidebar-nav {
   margin: 0;
@@ -1550,7 +1550,7 @@ input.menu-search-input {
   margin-left: 60px;
   font-size: 16px;
   font-weight: normal;
-  font-family: Lato, "Microsoft Jhenghei", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-family: Lato, 'Open Sans', 'Helvetica Neue', 'Helvetica', 'Arial', '�q���M�m�p�S Pro W3', 'Hiragino Kaku Gothic Pro', '���C���I', Meiryo, '�l�r �o�S�V�b�N', 'MS PGothic', sans-serif, sans-serif;
   line-height: inherit;
 }
 .posts-collapse .post-title::after {
