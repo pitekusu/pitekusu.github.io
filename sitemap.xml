@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://pitekusu.github.io/categories/index.html</loc>
+    <lastmod>2015-04-24T02:05:17.367Z</lastmod>
+  </url>
+  
+  <url>
     <loc>http://pitekusu.github.io/about/index.html</loc>
     <lastmod>2015-04-24T02:02:16.323Z</lastmod>
   </url>
