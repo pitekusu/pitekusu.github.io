@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://pitekusu.github.io/about/index.html</loc>
+    <lastmod>2015-04-24T01:55:30.990Z</lastmod>
+  </url>
+  
+  <url>
     <loc>http://pitekusu.github.io/2015/04/23/GitHub%E3%81%A8Hexo%E3%81%8C%E7%81%AB%E3%82%92%E5%99%B4%E3%81%84%E3%81%9F2/</loc>
     <lastmod>2015-04-24T00:53:05.000Z</lastmod>
   </url>
