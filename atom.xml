@@ -4,7 +4,7 @@
   
   <link href="/atom.xml" rel="self"/>
   <link href="http://pitekusu.github.io/"/>
-  <updated>2015-05-07T00:38:42.000Z</updated>
+  <updated>2015-05-07T00:49:54.000Z</updated>
   <id>http://pitekusu.github.io/</id>
   
   <author>
@@ -19,7 +19,7 @@
     <link href="http://pitekusu.github.io/2015/04/23/GitHub%E3%81%A8Hexo%E3%81%8C%E7%81%AB%E3%82%92%E5%99%B4%E3%81%84%E3%81%9F2/"/>
     <id>http://pitekusu.github.io/2015/04/23/GitHubとHexoが火を噴いた2/</id>
     <published>2015-04-23T08:50:33.000Z</published>
-    <updated>2015-05-07T00:38:42.000Z</updated>
+    <updated>2015-05-07T00:49:54.000Z</updated>
     <content type="html"><![CDATA[<h2 id="はじめに">はじめに</h2><p><a href="http://pitekusu.github.io/2015/04/22/GitHub%E3%81%A8Hexo%E3%81%8C%E7%81%AB%E3%82%92%E5%99%B4%E3%81%84%E3%81%9F/" target="_blank" rel="external">前回の記事</a>で、GithubとHexoについてちらっと調べてみました。今回はGithub Pagesで実際にサイトを開設しようと思います。<strong>と思いましたが、</strong> Github Pagesにしても、Hexoにしても基本的にはLinux環境が必要になるので、しょぼい仮想マシンを構築しちゃいます。重い処理も容量も必要ないので本当にゴミみたいな仮想マシンで問題ないでしょう。しかし、私は <strong>あずにゃんESXiサーバ</strong> という小さくても頑張ってるサーバを構築していますので、こちらに仮想マシンを設置していきたいと思います。</p>
 <a id="more"></a>
 <p>ちなみにあずにゃんESXiサーバの外観はこれ。<br><img src="http://i.imgur.com/WC8DA2k.jpg" alt="あずにゃんESXi"></p>
@@ -55,10 +55,10 @@
 <p><img src="http://i.imgur.com/y3pzAfm.png" alt="インストール6"></p>
 <p>インストールが終わるとログインを促すプロンプトが表示されます。これにてインストール完了でゲソ。SSHで接続できるのでvSphereは終了です。</p>
 <h3 id="CentOS7の基本設定">CentOS7の基本設定</h3><p>今回はセキュリティのことなんて何も考えていない設定です。ネットワークサービスとしてはGitHub Pagesにデプロイするだけなので、恐らくファイアウォールもSELinuxも停止する必要はないです。備忘録として書き留めておきます。</p>
-<h2 id="ファイアウォールの停止・無効化">ファイアウォールの停止・無効化</h2><p>以下コマンドでファイアウォールの状態を確認します。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># systemctl status firewalld&#10;firewalld.service - firewalld - dynamic firewall daemon&#10;   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; enabled)&#10;   Active: active (running) since &#26408; 2015-04-23 17:46:01 JST; 1 weeks 6 days ago&#10; Main PID: 560 (firewalld)&#10;   CGroup: /system.slice/firewalld.service&#10;           mq560 /usr/bin/python -Es /usr/sbin/firewalld --nofork --nopid&#10;&#10; 4&#26376; 23 17:46:01 localhost.localdomain systemd[1]: Started firewalld - dynamic firewall daemon.</span><br></pre></td></tr></table></figure>
+<h4 id="ファイアウォールの停止・無効化">ファイアウォールの停止・無効化</h4><p>以下コマンドでファイアウォールの状態を確認します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl status firewalld</span></span><br><span class="line">firewalld.service - firewalld - dynamic firewall daemon</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; enabled)</span><br><span class="line">   Active: active (running) since 木 <span class="number">2015</span>-<span class="number">04</span>-<span class="number">23</span> <span class="number">17</span>:<span class="number">46</span>:<span class="number">01</span> JST; <span class="number">1</span> weeks <span class="number">6</span> days ago</span><br><span class="line"> Main PID: <span class="number">560</span> (firewalld)</span><br><span class="line">   CGroup: /system.slice/firewalld.service</span><br><span class="line">           mq560 /usr/bin/python -Es /usr/sbin/firewalld --nofork --nopid</span><br><span class="line"></span><br><span class="line"> <span class="number">4</span>月 <span class="number">23</span> <span class="number">17</span>:<span class="number">46</span>:<span class="number">01</span> localhost.localdomain systemd[<span class="number">1</span>]: Started firewalld - dynamic firewall daemon.</span><br></pre></td></tr></table></figure>
 <p>現在はactive(running)とあります。これを停止させてみます。</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># systemctl stop firewalld&#10;#</span><br></pre></td></tr></table></figure>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl stop firewalld</span></span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
 ]]></content>
     <summary type="html">
     <![CDATA[<h2 id="はじめに">はじめに</h2><p><a href="http://pitekusu.github.io/2015/04/22/GitHub%E3%81%A8Hexo%E3%81%8C%E7%81%AB%E3%82%92%E5%99%B4%E3%81%84%E3%81%9F/">前回の記事</a>で、GithubとHexoについてちらっと調べてみました。今回はGithub Pagesで実際にサイトを開設しようと思います。<strong>と思いましたが、</strong> Github Pagesにしても、Hexoにしても基本的にはLinux環境が必要になるので、しょぼい仮想マシンを構築しちゃいます。重い処理も容量も必要ないので本当にゴミみたいな仮想マシンで問題ないでしょう。しかし、私は <strong>あずにゃんESXiサーバ</strong> という小さくても頑張ってるサーバを構築していますので、こちらに仮想マシンを設置していきたいと思います。</p>]]>
