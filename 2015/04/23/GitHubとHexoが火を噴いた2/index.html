@@ -20,7 +20,7 @@
 
 
 
-  <meta name="keywords" content="ESXi,vmware," />
+  <meta name="keywords" content="ESXi,Linux,VMware," />
 
 
 
@@ -210,6 +210,41 @@
 <p>以上でファイアウォールを無効化できました。<br>一応確認しておきます。</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl status firewalld -l</span></span><br><span class="line">firewalld.service - firewalld - dynamic firewall daemon</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; disabled)</span><br><span class="line">   Active: inactive (dead)</span><br><span class="line"></span><br><span class="line"> <span class="number">4</span>月 <span class="number">23</span> <span class="number">17</span>:<span class="number">45</span>:<span class="number">59</span> localhost.localdomain systemd[<span class="number">1</span>]: Starting firewalld - dynamic firewall daemon...</span><br><span class="line"> <span class="number">4</span>月 <span class="number">23</span> <span class="number">17</span>:<span class="number">46</span>:<span class="number">01</span> localhost.localdomain systemd[<span class="number">1</span>]: Started firewalld - dynamic firewall daemon.</span><br><span class="line"> <span class="number">5</span>月 <span class="number">07</span> <span class="number">09</span>:<span class="number">38</span>:<span class="number">06</span> localhost.localdomain systemd[<span class="number">1</span>]: Stopping firewalld - dynamic firewall daemon...</span><br><span class="line"> <span class="number">5</span>月 <span class="number">07</span> <span class="number">09</span>:<span class="number">38</span>:<span class="number">06</span> localhost.localdomain systemd[<span class="number">1</span>]: Stopped firewalld - dynamic firewall daemon.</span><br></pre></td></tr></table></figure>
 <p>Loaded部分がdisabledに変わりました。問題なさそうです。</p>
+<h4 id="SELinuxの停止・無効">SELinuxの停止・無効</h4><p>まず、SELinuxの動作状態を確認してみます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># getenforce</span></span><br><span class="line">Enforcing</span><br></pre></td></tr></table></figure>
+<p>SELinuxの動作モードは以下の3つになります。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">動作モード</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Enforcing</td>
+<td>SELinuxが有効</td>
+</tr>
+<tr>
+<td style="text-align:left">Permissive</td>
+<td>SELinuxのチェックはするけどアクセス拒否はしない</td>
+</tr>
+<tr>
+<td style="text-align:left">disabled</td>
+<td>SELinuxが無効</td>
+</tr>
+</tbody>
+</table>
+<p>現在はEnforcingなので、SELinuxが有効状態です。以下のコマンドで停止させます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># setenforce 0</span></span><br></pre></td></tr></table></figure>
+<p>再度確認します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gentenfoce</span></span><br><span class="line">Permissive</span><br></pre></td></tr></table></figure>
+<p>SELinuxもこのままだと再起動後に復活するので、無効化しておきます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vi /etc/sysconfig/selinux</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># This file controls the state of SELinux on the system.</span></span><br><span class="line"><span class="comment"># SELINUX= can take one of these three values:</span></span><br><span class="line"><span class="comment">#     enforcing - SELinux security policy is enforced.</span></span><br><span class="line"><span class="comment">#     permissive - SELinux prints warnings instead of enforcing.</span></span><br><span class="line"><span class="comment">#     disabled - No SELinux policy is loaded.</span></span><br><span class="line">SELINUX=disabled</span><br></pre></td></tr></table></figure>
+<p>これでシステムを再起動し、再度確認します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gentenfoce</span></span><br><span class="line">Disabled</span><br></pre></td></tr></table></figure>
+<p>完璧に無効化されました。<br>あとは<code>yum update</code>とかしたらいいんじゃないでしょうか。</p>
+<p>次回はHexoを実際にインストールします。<br>あずにゃん</p>
 
       
     </div>
@@ -220,7 +255,9 @@
           
             <a href="/tags/ESXi/"> #ESXi </a>
           
-            <a href="/tags/vmware/"> #vmware </a>
+            <a href="/tags/Linux/"> #Linux </a>
+          
+            <a href="/tags/VMware/"> #VMware </a>
           
         </div>
       
@@ -308,7 +345,7 @@
 
           <div class="site-state-item site-state-tags">
             <a href="/tags">
-              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-count">5</span>
               <span class="site-state-item-name">tags</span>
               </a>
           </div>
@@ -345,7 +382,7 @@
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#はじめに"><span class="nav-number">1.</span> <span class="nav-text">はじめに</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#仮想マシンを作る！"><span class="nav-number">2.</span> <span class="nav-text">仮想マシンを作る！</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ログイン"><span class="nav-number">2.1.</span> <span class="nav-text">ログイン</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#仮想マシンの準備"><span class="nav-number">2.2.</span> <span class="nav-text">仮想マシンの準備</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux_(CentOS7)の準備"><span class="nav-number">3.</span> <span class="nav-text">Linux (CentOS7)の準備</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CentOS7のインストール"><span class="nav-number">3.1.</span> <span class="nav-text">CentOS7のインストール</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CentOS7の基本設定"><span class="nav-number">3.2.</span> <span class="nav-text">CentOS7の基本設定</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ファイアウォールの停止・無効"><span class="nav-number">3.2.1.</span> <span class="nav-text">ファイアウォールの停止・無効</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#はじめに"><span class="nav-number">1.</span> <span class="nav-text">はじめに</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#仮想マシンを作る！"><span class="nav-number">2.</span> <span class="nav-text">仮想マシンを作る！</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ログイン"><span class="nav-number">2.1.</span> <span class="nav-text">ログイン</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#仮想マシンの準備"><span class="nav-number">2.2.</span> <span class="nav-text">仮想マシンの準備</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux_(CentOS7)の準備"><span class="nav-number">3.</span> <span class="nav-text">Linux (CentOS7)の準備</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CentOS7のインストール"><span class="nav-number">3.1.</span> <span class="nav-text">CentOS7のインストール</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CentOS7の基本設定"><span class="nav-number">3.2.</span> <span class="nav-text">CentOS7の基本設定</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ファイアウォールの停止・無効"><span class="nav-number">3.2.1.</span> <span class="nav-text">ファイアウォールの停止・無効</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SELinuxの停止・無効"><span class="nav-number">3.2.2.</span> <span class="nav-text">SELinuxの停止・無効</span></a></li></ol></li></ol></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
