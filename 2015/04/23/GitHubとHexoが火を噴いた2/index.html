@@ -20,7 +20,7 @@
 
 
 
-  <meta name="keywords" content="ESXi,あずにゃん,インフラエンジニア,サーバ,サーバエンジニア" />
+  <meta name="keywords" content="ESXi,Linux,VMware," />
 
 
 
@@ -33,7 +33,7 @@
 
 
 
-  <title>  // あずにゃんインフラ技術 </title>
+  <title> GitHubとHexoが火を噴いた(第2回) // あずにゃんインフラ技術 </title>
 </head>
 
 <body>
@@ -120,7 +120,7 @@
           
           
             
-              
+              GitHubとHexoが火を噴いた(第2回)
             
           
         </h1>
@@ -128,17 +128,28 @@
 
       <div class="post-meta">
         <span class="post-time">
-          Posted on 2015-05-08
+          Posted on 2015-04-23
         </span>
 
+        
+          <span class="post-category">
+            &nbsp; | &nbsp; In
+            
+              <a href="/categories/技術/">技術</a>
+
+              
+              
+
+            
+          </span>
         
 
         
           
             <span class="post-comments-count">
             &nbsp; | &nbsp;
-            <a href="/2015/05/08/GitHubとHexoが火を噴いた2/#comments" >
-              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/05/08/GitHubとHexoが火を噴いた2/"></span>
+            <a href="/2015/04/23/GitHubとHexoが火を噴いた2/#comments" >
+              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/04/23/GitHubとHexoが火を噴いた2/"></span>
             </a>
           </span>
           
@@ -152,22 +163,116 @@
       
 
       
-        
+        <h2 id="はじめに">はじめに</h2><p><a href="http://pitekusu.github.io/2015/04/22/GitHub%E3%81%A8Hexo%E3%81%8C%E7%81%AB%E3%82%92%E5%99%B4%E3%81%84%E3%81%9F/" target="_blank" rel="external">前回の記事</a>で、GithubとHexoについてちらっと調べてみました。今回はGithub Pagesで実際にサイトを開設しようと思います。<strong>と思いましたが、</strong> Github Pagesにしても、Hexoにしても基本的にはLinux環境が必要になるので、しょぼい仮想マシンを構築しちゃいます。重い処理も容量も必要ないので本当にゴミみたいな仮想マシンで問題ないでしょう。しかし、私は <strong>あずにゃんESXiサーバ</strong> という小さくても頑張ってるサーバを構築していますので、こちらに仮想マシンを設置していきたいと思います。</p>
+<a id="more"></a>
+<p>ちなみにあずにゃんESXiサーバの外観はこれ。<br><img src="http://i.imgur.com/WC8DA2k.jpg" alt="あずにゃんESXi"></p>
+<p>Intel製NUCです。手のひらサイズですが、中に16GBのメモリを積んでおります。HDDやSSDは積んでいませんが、ネットワーク経由で共有ストレージをデータストアとして使用しています。上に鎮座しているあずにゃんによって日々の保守運用がなされているのです！！！！</p>
+<h2 id="仮想マシンを作る！">仮想マシンを作る！</h2><p>ESXiはハイパーバイザ型の仮想化ソフトです。なので巷でよく使用されるようなVmware Player等といったようにWindows上で動作するのではなく、ESXiというソフトの上で動きます。WindowsからESXiにアクセスするには何らかのクライアントを使用する必要があります。vSphere5くらいから、vCenterServerがあるのであればWeb Clientを使用するのが推奨となっているようです。ただしWebClientは動作が遅いことからあまり人気が無い様子。今後に期待です。</p>
+<h3 id="ログイン">ログイン</h3><p>折角なのでWebClientを使ってログインします。<br><img src="http://i.imgur.com/krxbslx.png" alt="ログイン画面"></p>
+<p>この通りかなりおしゃれです。私は何を隠そうログイン画面フェチでして、かっこいいログイン画面を見るのがかなり、非常に好きです。ログイン画面がかっこいいだけでそのソフトを導入したくなります。VMware製品は製品名もかっこいいのでうれしい限り。</p>
+<h3 id="仮想マシンの準備">仮想マシンの準備</h3><p>ログインすると、こんな画面が出てきます。<br><img src="http://i.imgur.com/uQeXqOA.png" alt="ログイン後"></p>
+<p>左側に既に作成済みの仮想マシンが並んでいます。<br>16GBのメモリを積んでいるといっても、所詮はNUCなので普段使わない仮想マシンの電源は落としています。</p>
+<p><img src="http://i.imgur.com/ZndyNsT.png" alt="新規作成1"></p>
+<p>仮想マシンの新規作成を選ぶとウィザードが起動してきます。まず新規仮想マシンの名前を付けます。適当に「Blog用マシン」としました。</p>
+<p><img src="http://i.imgur.com/8m0ioha.png" alt="新規作成2"></p>
+<p>仮想マシンを保存するデータストアを選択します。今見えてきている”DataStore”っていうやつは、あずにゃんストレージというキュートな共有ストレージです。私の場合は1個しかないのでそのまま次へ。</p>
+<p><img src="http://i.imgur.com/BgTlcHA.png" alt="新規作成3"></p>
+<p>ここですかさずLinuxを選択します。CentOSが大好きなので今回はCentOSでいきます。多分、なんでも大丈夫です。</p>
+<p><img src="http://i.imgur.com/xFp7K6V.png" alt="新規作成4"><br><img src="http://i.imgur.com/Ta3qJUi.png" alt="新規作成5"></p>
+<p>ここで色々な設定をします。まったくもって低スペックで問題ないので基本デフォルトにしました。変更したのはプロビジョニング方法を”Thin Provisioning”に変えたのと、NICアダプタタイプをE1000からVMXNET3に変えたくらいです。あとは起動時にISOイメージを読み込むように設定したくらいです。</p>
+<p>“Thin Provisioning”にすることで容量を最初からすべて確保するわけではなく、必要になった時に都度確保するようになりディスクスペースの節約ができます。</p>
+<p>NICに関しては基本的にはVMXNET3に変えるのが普通だと思います。”VMware Tools”というツールをインストールする必要がありますが（CentOS 7は必要無し）、特に問題なければVMXNET3でいきます。</p>
+<p><img src="http://i.imgur.com/Cw9gxPy.png" alt="新規作成5"></p>
+<p>仮想マシンのツリーに、作成した”Blog用マシン”が登場しました。これで準備OKです。実に簡単！</p>
+<h2 id="Linux_(CentOS7)の準備">Linux (CentOS7)の準備</h2><p>ここまで来たら、vSphere Clientの仕事はほぼ終了ですが、SSH接続するまではvSphere上で作業します。Webアプリですが、なかなかよくできていてWeb上からコンソールを開いて作業することができます。以下がその画面になります。</p>
+<h3 id="CentOS7のインストール">CentOS7のインストール</h3><p><img src="http://i.imgur.com/wzCM5Qd.png" alt="インストール1"></p>
+<p>Web上でCentOS7のインストーラが起動し始めているのがわかります。うーん先進的です。</p>
+<p><img src="http://i.imgur.com/RahI0r0.png" alt="インストール2"></p>
+<p>GUIの画面ですね。わかりやすいです。Linuxは全く詳しくないので何も弄りませんが、ネットワークにつながってないとあれなんでそこだけ設定します（後でコマンドで設定しても何ら問題ないです）。</p>
+<p><img src="http://i.imgur.com/f99oOQx.png" alt="インストール3"></p>
+<p>何も考えずIPアドレスを設定します。DHCPでもいいかもしれませんが、SSHで接続することを考えると固定がいいんじゃないでしょうか。</p>
+<p><img src="http://i.imgur.com/j8s2P9Y.png" alt="インストール4"></p>
+<p>全般タブで自動的に接続するように変えておきます。</p>
+<p><img src="http://i.imgur.com/sqBCGkD.png" alt="インストール5"></p>
+<p>インストールが始まりました。rootパスワードだけ変えておきます。インストール中に設定変えるんですね。効率が良い。</p>
+<p><img src="http://i.imgur.com/y3pzAfm.png" alt="インストール6"></p>
+<p>インストールが終わるとログインを促すプロンプトが表示されます。これにてインストール完了でゲソ。SSHで接続できるのでvSphereは終了です。</p>
+<h3 id="CentOS7の基本設定">CentOS7の基本設定</h3><p>今回はセキュリティのことなんて何も考えていない設定です。今回は恐らくファイアウォールもSELinuxも停止する必要はないです。備忘録として書き留めておきます。</p>
+<h4 id="ファイアウォールの停止・無効">ファイアウォールの停止・無効</h4><p>以下コマンドでファイアウォールの状態を確認します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl status firewalld</span></span><br><span class="line">firewalld.service - firewalld - dynamic firewall daemon</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; enabled)</span><br><span class="line">   Active: active (running) since 木 <span class="number">2015</span>-<span class="number">04</span>-<span class="number">23</span> <span class="number">17</span>:<span class="number">46</span>:<span class="number">01</span> JST; <span class="number">1</span> weeks <span class="number">6</span> days ago</span><br><span class="line"> Main PID: <span class="number">560</span> (firewalld)</span><br><span class="line">   CGroup: /system.slice/firewalld.service</span><br><span class="line">           mq560 /usr/bin/python -Es /usr/sbin/firewalld --nofork --nopid</span><br><span class="line"></span><br><span class="line"> <span class="number">4</span>月 <span class="number">23</span> <span class="number">17</span>:<span class="number">46</span>:<span class="number">01</span> localhost.localdomain systemd[<span class="number">1</span>]: Started firewalld - dynamic firewall daemon.</span><br></pre></td></tr></table></figure>
+<p>現在はactive(running)とあります。これを停止させてみます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl stop firewalld</span></span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<p>もう一度ファイアウォールの状態を確認してみます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl status firewalld</span></span><br><span class="line">firewalld.service - firewalld - dynamic firewall daemon</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; enabled)</span><br><span class="line">   Active: inactive (dead) since 木 <span class="number">2015</span>-<span class="number">05</span>-<span class="number">07</span> <span class="number">09</span>:<span class="number">38</span>:<span class="number">06</span> JST; <span class="number">17</span>min ago</span><br><span class="line">  Process: <span class="number">560</span> ExecStart=/usr/sbin/firewalld --nofork --nopid <span class="variable">$FIREWALLD_ARGS</span> (code=exited, status=<span class="number">0</span>/SUCCESS)</span><br><span class="line"> Main PID: <span class="number">560</span> (code=exited, status=<span class="number">0</span>/SUCCESS)</span><br><span class="line"></span><br><span class="line"> <span class="number">4</span>月 <span class="number">23</span> <span class="number">17</span>:<span class="number">46</span>:<span class="number">01</span> localhost.localdomain systemd[<span class="number">1</span>]: Started firewalld - dynamic firewall daemon.</span><br><span class="line"> <span class="number">5</span>月 <span class="number">07</span> <span class="number">09</span>:<span class="number">38</span>:<span class="number">06</span> localhost.localdomain systemd[<span class="number">1</span>]: Stopping firewalld - dynamic firewall daemon...</span><br><span class="line"> <span class="number">5</span>月 <span class="number">07</span> <span class="number">09</span>:<span class="number">38</span>:<span class="number">06</span> localhost.localdomain systemd[<span class="number">1</span>]: Stopped firewalld - dynamic firewall daemon.</span><br><span class="line">Hint: Some lines were ellipsized, use <span class="operator">-l</span> to show <span class="keyword">in</span> full.</span><br></pre></td></tr></table></figure>
+<p>今度はinactive(dead)となっています。ただし、Loadedの部分を見ると、enabledと記載されています。このままだと、システムを再起動するとファイアウォールが有効化されてしまいます。</p>
+<p>次回起動時にも無効化されているように、次のコマンドを入力しておきます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl disable firewalld</span></span><br><span class="line">rm <span class="string">'/etc/systemd/system/dbus-org.fedoraproject.FirewallD1.service'</span></span><br><span class="line">rm <span class="string">'/etc/systemd/system/basic.target.wants/firewalld.service'</span></span><br></pre></td></tr></table></figure>
+<p>以上でファイアウォールを無効化できました。<br>一応確認しておきます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># systemctl status firewalld -l</span></span><br><span class="line">firewalld.service - firewalld - dynamic firewall daemon</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; disabled)</span><br><span class="line">   Active: inactive (dead)</span><br><span class="line"></span><br><span class="line"> <span class="number">4</span>月 <span class="number">23</span> <span class="number">17</span>:<span class="number">45</span>:<span class="number">59</span> localhost.localdomain systemd[<span class="number">1</span>]: Starting firewalld - dynamic firewall daemon...</span><br><span class="line"> <span class="number">4</span>月 <span class="number">23</span> <span class="number">17</span>:<span class="number">46</span>:<span class="number">01</span> localhost.localdomain systemd[<span class="number">1</span>]: Started firewalld - dynamic firewall daemon.</span><br><span class="line"> <span class="number">5</span>月 <span class="number">07</span> <span class="number">09</span>:<span class="number">38</span>:<span class="number">06</span> localhost.localdomain systemd[<span class="number">1</span>]: Stopping firewalld - dynamic firewall daemon...</span><br><span class="line"> <span class="number">5</span>月 <span class="number">07</span> <span class="number">09</span>:<span class="number">38</span>:<span class="number">06</span> localhost.localdomain systemd[<span class="number">1</span>]: Stopped firewalld - dynamic firewall daemon.</span><br></pre></td></tr></table></figure>
+<p>Loaded部分がdisabledに変わりました。問題なさそうです。</p>
+<h4 id="SELinuxの停止・無効">SELinuxの停止・無効</h4><p>まず、SELinuxの動作状態を確認してみます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># getenforce</span></span><br><span class="line">Enforcing</span><br></pre></td></tr></table></figure>
+<p>SELinuxの動作モードは以下の3つになります。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">動作モード</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Enforcing</td>
+<td>SELinuxが有効</td>
+</tr>
+<tr>
+<td style="text-align:left">Permissive</td>
+<td>SELinuxのチェックはするけどアクセス拒否はしない</td>
+</tr>
+<tr>
+<td style="text-align:left">disabled</td>
+<td>SELinuxが無効</td>
+</tr>
+</tbody>
+</table>
+<p>現在はEnforcingなので、SELinuxが有効状態です。以下のコマンドで停止させます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># setenforce 0</span></span><br></pre></td></tr></table></figure>
+<p>再度確認します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gentenfoce</span></span><br><span class="line">Permissive</span><br></pre></td></tr></table></figure>
+<p>SELinuxもこのままだと再起動後に復活するので、無効化しておきます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vi /etc/sysconfig/selinux</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># This file controls the state of SELinux on the system.</span></span><br><span class="line"><span class="comment"># SELINUX= can take one of these three values:</span></span><br><span class="line"><span class="comment">#     enforcing - SELinux security policy is enforced.</span></span><br><span class="line"><span class="comment">#     permissive - SELinux prints warnings instead of enforcing.</span></span><br><span class="line"><span class="comment">#     disabled - No SELinux policy is loaded.</span></span><br><span class="line">SELINUX=disabled</span><br></pre></td></tr></table></figure>
+<p>これでシステムを再起動し、再度確認します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gentenfoce</span></span><br><span class="line">Disabled</span><br></pre></td></tr></table></figure>
+<p>完璧に無効化されました。<br>あとは<code>yum update</code>とかしたらいいんじゃないでしょうか。</p>
+<p>次回はHexoを実際にインストールします。<br>あずにゃん</p>
+
       
     </div>
 
     <div class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ESXi/"> #ESXi </a>
+          
+            <a href="/tags/Linux/"> #Linux </a>
+          
+            <a href="/tags/VMware/"> #VMware </a>
+          
+        </div>
       
 
       
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2015/05/08/GitHubとHexoが火を噴いた3/">GitHubとHexoが火を噴いた(第3回)</a>
+            
           </div>
 
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/05/08/GitHubとHexoが火を噴いた3/">GitHubとHexoが火を噴いた(第3回)</a>
+              <a href="/2015/04/22/GitHubとHexoが火を噴いた/">GitHubとHexoが火を噴いた(第1回)</a>
             
           </div>
         </div>
@@ -242,7 +347,7 @@
 
           <div class="site-state-item site-state-tags">
             <a href="/tags">
-              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-count">5</span>
               <span class="site-state-item-name">tags</span>
               </a>
           </div>
@@ -279,7 +384,7 @@
           <div class="post-toc">
             
             
-              <p class="post-toc-empty">This post does not have a Table Of Contents</p>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#はじめに"><span class="nav-number">1.</span> <span class="nav-text">はじめに</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#仮想マシンを作る！"><span class="nav-number">2.</span> <span class="nav-text">仮想マシンを作る！</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ログイン"><span class="nav-number">2.1.</span> <span class="nav-text">ログイン</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#仮想マシンの準備"><span class="nav-number">2.2.</span> <span class="nav-text">仮想マシンの準備</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux_(CentOS7)の準備"><span class="nav-number">3.</span> <span class="nav-text">Linux (CentOS7)の準備</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CentOS7のインストール"><span class="nav-number">3.1.</span> <span class="nav-text">CentOS7のインストール</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CentOS7の基本設定"><span class="nav-number">3.2.</span> <span class="nav-text">CentOS7の基本設定</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ファイアウォールの停止・無効"><span class="nav-number">3.2.1.</span> <span class="nav-text">ファイアウォールの停止・無効</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SELinuxの停止・無効"><span class="nav-number">3.2.2.</span> <span class="nav-text">SELinuxの停止・無効</span></a></li></ol></li></ol></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
@@ -849,8 +954,8 @@
 
     <script type="text/javascript">
       var disqus_shortname = 'azunyan';
-      var disqus_identifier = '2015/05/08/GitHubとHexoが火を噴いた2/';
-      var disqus_url = 'http://pitekusu.github.io/2015/05/08/GitHubとHexoが火を噴いた2/';
+      var disqus_identifier = '2015/04/23/GitHubとHexoが火を噴いた2/';
+      var disqus_url = 'http://pitekusu.github.io/2015/04/23/GitHubとHexoが火を噴いた2/';
 
       (function(){
         var dsq = document.createElement('script');
