@@ -20,7 +20,7 @@
 
 
 
-  <meta name="keywords" content="Linux,Webサービス," />
+  <meta name="keywords" content="Linux,Node.js," />
 
 
 
@@ -33,7 +33,7 @@
 
 
 
-  <title> GitHubとHexoが火を噴いた(第1回) // あずにゃんインフラ技術 </title>
+  <title> GitHubとHexoが火を噴いた(第3回) // あずにゃんインフラ技術 </title>
 </head>
 
 <body>
@@ -120,7 +120,7 @@
           
           
             
-              GitHubとHexoが火を噴いた(第1回)
+              GitHubとHexoが火を噴いた(第3回)
             
           
         </h1>
@@ -128,7 +128,7 @@
 
       <div class="post-meta">
         <span class="post-time">
-          Posted on 2015-04-22
+          Posted on 2015-05-08
         </span>
 
         
@@ -148,8 +148,8 @@
           
             <span class="post-comments-count">
             &nbsp; | &nbsp;
-            <a href="/2015/04/22/GitHubとHexoが火を噴いた/#comments" >
-              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/04/22/GitHubとHexoが火を噴いた/"></span>
+            <a href="/2015/05/08/GitHubとHexoが火を噴いた3/#comments" >
+              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/05/08/GitHubとHexoが火を噴いた3/"></span>
             </a>
           </span>
           
@@ -163,44 +163,35 @@
       
 
       
-        <h2 id="はじめに">はじめに</h2><p>最近は会社が大変ヒマでして、社内ニートな私にとって技術の勉強をしているように見せかけつつ趣味に走ることがマイブームとなっております。そんな私に与えられたおもちゃは仮想環境であるVmware社のESXi。そしてネット環境。いろいろ試してみたくなっちゃいます。</p>
+        <h2 id="はじめに">はじめに</h2><p><a href="http://pitekusu.github.io/2015/04/23/GitHub%E3%81%A8Hexo%E3%81%8C%E7%81%AB%E3%82%92%E5%99%B4%E3%81%84%E3%81%9F2/" target="_blank" rel="external">第2回</a>でLinuxの基本設定まで終えました。ついに満を持してHexoのインストールと参ります、</p>
 <a id="more"></a>
-<h3 id="そういえば最近ブログ更新してないな～">そういえば最近ブログ更新してないな～</h3><p>昔、Googleサイトでブログチックなサイトを開設したのですが、いかんせん管理が難しくすぐに挫折してしまいました。そこで今回暇つぶしにネット見てたら見つけたのがこの2つの組み合わせ。</p>
-<ul>
-<li>Github</li>
-<li>Hexo</li>
-</ul>
-<p>どっちもきいたことがない！Githubっていうのはたま～にエンジニアの皆様のツイートでお見かけするのですが、Hexoっていうのは全くわからん！ということで一から調べることにしました。</p>
-<h2 id="GithubとHexoについて調べてみた">GithubとHexoについて調べてみた</h2><h3 id="Github">Github</h3><p><a href="https://github.com" target="_blank" rel="external"><img src="http://i.imgur.com/oQ0F5OD.png" alt="GitHubの公式ページ"></a></p>
-<blockquote>
-<p>GitHub（ギットハブ）はソフトウェア開発プロジェクトのための共有ウェブサービスであり、Gitバージョン管理システムを使用する。<br><a href="http://ja.wikipedia.org/wiki/GitHub" target="_blank" rel="external">Github(ウィキペディア)</a>  </p>
+<h2 id="と思ったらnode-jsいれなきゃ">と思ったらnode.jsいれなきゃ</h2><p>Hexoをインストールする前にハイパーすごいと噂のnode.jsをインストールします。<br>あと今日は恐らく準備で私が力尽きます。</p>
+<h3 id="NVMのインストール">NVMのインストール</h3><p>node.jsのバージョン管理に便利（らしい）、NVM(Node Version Manager)を先に入れておきます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#yum -y install git</span></span><br><span class="line"></span><br><span class="line">~省略~</span><br><span class="line"></span><br><span class="line"><span class="comment"># git clone git://github.com/creationix/nvm.git ~/.nvm</span></span><br><span class="line">Cloning into <span class="string">'/root/.nvm'</span>...</span><br><span class="line">remote: Counting objects: <span class="number">3628</span>, done.</span><br><span class="line">remote: Compressing objects: <span class="number">100</span>% (<span class="number">3</span>/<span class="number">3</span>), done.</span><br><span class="line">remote: Total <span class="number">3628</span> (delta <span class="number">0</span>), reused <span class="number">0</span> (delta <span class="number">0</span>), pack-reused <span class="number">3625</span></span><br><span class="line">Receiving objects: <span class="number">100</span>% (<span class="number">3628</span>/<span class="number">3628</span>), <span class="number">777.24</span> KiB | <span class="number">432.00</span> KiB/s, done.</span><br><span class="line">Resolving deltas: <span class="number">100</span>% (<span class="number">2084</span>/<span class="number">2084</span>), done.</span><br><span class="line"></span><br><span class="line"><span class="comment"># source ~/.nvm/nvm.sh</span></span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<p>以上でインストール完了です。確認してみます。ヘルプが表示されればOKです。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># nvm help</span></span><br><span class="line"></span><br><span class="line">Node Version Manager</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  nvm <span class="built_in">help</span>                              Show this message</span><br><span class="line">~省略~</span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h3 id="Node-jsのインストール">Node.jsのインストール</h3><p>やっとNode.jsをインストールします。さっき入れたnvmコマンドを使用します。導入するNode.jsのバージョンを確認するため、以下のコマンドを入力します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># nvm ls-remote</span></span><br><span class="line">v0.<span class="number">1.14</span></span><br><span class="line">v0.<span class="number">1.15</span></span><br><span class="line">v0.<span class="number">1.16</span></span><br><span class="line">v0.<span class="number">1.17</span></span><br><span class="line">~省略~</span><br><span class="line">v0.<span class="number">11.16</span></span><br><span class="line">v0.<span class="number">12.0</span></span><br><span class="line">v0.<span class="number">12.1</span></span><br><span class="line">v0.<span class="number">12.2</span></span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<p>Node.jsは偶数のバージョンが安定版で、奇数のバージョンが開発版です。<br>この記事を書いているときはv0.12.2が最新の安定板だったので、これを導入することにします。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># nvm install 0.12.2</span></span><br><span class="line"><span class="comment">######################################################################## 100.0%</span></span><br><span class="line">Now using node v0.<span class="number">12.2</span> (npm v2.<span class="number">7.4</span>)</span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<p>ちゃんとインストールできているか確認します。バージョンが表示されれればOKです。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># node -v</span></span><br><span class="line">v0.<span class="number">12.2</span></span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h3 id="NVMを設定しておく">NVMを設定しておく</h3><p>さっき設定したのを、CentOS再起動後も使えるようにしておきます。<br>まず、デフォルトのNode.jsのバージョンを指定します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># nvm alias default 0.12.2</span></span><br><span class="line">default -&gt; <span class="number">0.12</span>.<span class="number">2</span> (-&gt; v0.<span class="number">12.2</span>)</span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<p>nvmもログアウトすると使えなくなるので、<code>~/.bash_profile</code>に記載しておきます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vi ~/.bash_profile</span></span><br><span class="line"><span class="keyword">if</span> [[ <span class="operator">-s</span> ~/.nvm/nvm.sh ]];</span><br><span class="line"> <span class="keyword">then</span> <span class="built_in">source</span> ~/.nvm/nvm.sh</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<p>これで次回再起動後もNVMとNode.jsが使用できます。</p>
+<h2 id="Hello_Worldするかしら">Hello Worldするかしら</h2><p>webブラウザにHello Worldを表示してみます。ちゃんと出てきたら満点といえます。<br>viかなんかで”example.js”というファイルを作って以下のスクリプトを記述します。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># vi example.js</span><br><span class="line"><span class="keyword">var</span> http = <span class="built_in">require</span>(<span class="string">'http'</span>);</span><br><span class="line"></span><br><span class="line">http.createServer(<span class="function"><span class="keyword">function</span> <span class="params">(request, response)</span> </span>&#123;</span><br><span class="line">  response.writeHead(<span class="number">200</span>, &#123;<span class="string">'Content-Type'</span>: <span class="string">'text/plain'</span>&#125;);</span><br><span class="line">  response.end(<span class="string">'Hello Azunyan\n'</span>);</span><br><span class="line">&#125;).listen(<span class="number">8124</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'Server running at http://127.0.0.1:8124/'</span>);</span><br></pre></td></tr></table></figure>
+<p>そして、以下のコマンドでサーバを起動してみます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># node example.js</span></span><br><span class="line">Server running at http://<span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">8124</span>/</span><br></pre></td></tr></table></figure>
+<p>実際にwebブラウザで接続してみます。</p>
+<p><img src="http://i.imgur.com/sHyGAIJ.png?1" alt="Hello Azunyan"></p>
+<p>問題なく表示されたら成功です！</p>
+<h2 id="おわり">おわり</h2><p>次で！ついに！Hexoをインストールすることにします！長いなながいにゃん</p>
+<h2 id="参考サイト様">参考サイト様</h2><blockquote>
+<p>いまアツいJavaScript！ゼロから始めるNode.js入門〜5分で環境構築編〜<br><a href="http://liginc.co.jp/web/programming/node-js/85318" target="_blank" rel="external">http://liginc.co.jp/web/programming/node-js/85318</a></p>
 </blockquote>
-<hr>
-<p>そう！そういう話は聞いたことありました。でもそれってブログと関係ねえじゃん？どういうことでしょうか。<br>もう少し調べてみたら、Githubのサービスの中に<a href="https://pages.github.com" target="_blank" rel="external">Github Pages</a>なるものがあることが判明。こいつは昔流行ったWebのレンタルサーバに似てるようだ。そしてその特徴がこちら。</p>
-<ul>
-<li>無料！</li>
-<li>広告なし！</li>
-<li>容量無制限！らしい（一応制限はあるらしいけどソフトクォータ的な制限とのこと）</li>
-<li>独自ドメインにできる！→これに関しては元のドメインがかっこいいから私はこのままいきます</li>
-<li>静的ページのみ対応</li>
-</ul>
-<p>素敵です！昔私はInfoseekでゴミみたいなページを公開して黒歴史化したので、こういったサービスがあるとまた歴史を繰り返したくなります！<br>ところで静的ページとはなんでしょうか？知らない言葉だらけです。軽く調べてみると、サーバサイド側の処理が必要なものっぽい？PHPとかのことでしょうか。こういうのが使えないって思うとかっちょいいページは作れないのかなと思ったのですが、最近はそうではないようです。<br>どうやらチョベリグ静的ページを簡単に実現するのが<strong>Hexo</strong>というもののようだ！</p>
-<h3 id="Hexo">Hexo</h3><p><a href="https://hexo.io" target="_blank" rel="external"><img src="http://i.imgur.com/i5Y0XNE.png" alt="hexoの公式ページ"></a></p>
-<blockquote>
-<p>A fast, simple &amp; powerful blog framework  </p>
-</blockquote>
-<hr>
-<p>速くてシンプルで強力とは！相当凄いに違いありません。<br>Hexoというのは静的サイトジェネレータというサービスの1つらしく、PHP等を使うことなく、クライアントサイド側の処理のみで死ぬほど簡単に洒落たページが作れるようです。また、静的ページなので動作も高速とのこと。これはいいぞ～<br>さらに作ったページを他のホスティングサービスにデプロイして公開することも簡単にできるとのこと。なるほど、ここでGithub Pagesがでできるわけですね。<br>一番人気のある静的サイトジェネレータは<a href="http://jekyllrb.com/" target="_blank" rel="external">Jekyll</a>  というものらしいのですが、静的サイトジェネレータを知ったきっかけがHexoだったので、今回はHexoでいきます。  </p>
-<p>静的サイトジェネレータには、大きく分けてRubyかJavaScriptで作られているようです。今回採用したHexoはJavaScriptで作られており、Rubyを新たに導入する必要はなさそうです。楽です。  </p>
-<p>そしてHexoの特徴はこちら。</p>
-<ul>
-<li>コマンドがめっちゃ簡単</li>
-<li>マークダウンをサポート。これ嬉しい！</li>
-<li>テーマ（デザインのテンプレート）がたくさんある</li>
-<li>JavaScript製<strong>(node.js)</strong></li>
-</ul>
-<p>ここで出てきた<a href="https://nodejs.org" target="_blank" rel="external">node.js</a>  というのが画期的なものらしく、私は全く専門外なので何もわかりませんがとにかくすごいということはわかりました。JavaScriptだけどサーバサイドで処理するってことだけわかった。普通のJavaScriptさえろくにかけない私にとっては完全に魔法の世界です。</p>
-<h2 id="次回">次回</h2><p>GithubにサインアップしてGithub Pagesにリポジトリを作成しようと思います。まだMarkdown記述になれていないので時間がかかっていますが、だんだん慣れてくれば早く描けるようになってくるでしょう。それではまた次回お会いしましょう。<strong><em>あずにゃん可愛い</em></strong></p>
 
       
     </div>
@@ -211,7 +202,7 @@
           
             <a href="/tags/Linux/"> #Linux </a>
           
-            <a href="/tags/Webサービス/"> #Webサービス </a>
+            <a href="/tags/Node-js/"> #Node.js </a>
           
         </div>
       
@@ -220,11 +211,11 @@
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/04/23/GitHubとHexoが火を噴いた2/">GitHubとHexoが火を噴いた(第2回)</a>
-            
           </div>
 
           <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/04/23/GitHubとHexoが火を噴いた2/">GitHubとHexoが火を噴いた(第2回)</a>
             
           </div>
         </div>
@@ -336,7 +327,7 @@
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#はじめに"><span class="nav-number">1.</span> <span class="nav-text">はじめに</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#そういえば最近ブログ更新してないな～"><span class="nav-number">1.1.</span> <span class="nav-text">そういえば最近ブログ更新してないな～</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GithubとHexoについて調べてみた"><span class="nav-number">2.</span> <span class="nav-text">GithubとHexoについて調べてみた</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Github"><span class="nav-number">2.1.</span> <span class="nav-text">Github</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hexo"><span class="nav-number">2.2.</span> <span class="nav-text">Hexo</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#次回"><span class="nav-number">3.</span> <span class="nav-text">次回</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#はじめに"><span class="nav-number">1.</span> <span class="nav-text">はじめに</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#と思ったらnode-jsいれなきゃ"><span class="nav-number">2.</span> <span class="nav-text">と思ったらnode.jsいれなきゃ</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NVMのインストール"><span class="nav-number">2.1.</span> <span class="nav-text">NVMのインストール</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-jsのインストール"><span class="nav-number">2.2.</span> <span class="nav-text">Node.jsのインストール</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NVMを設定しておく"><span class="nav-number">2.3.</span> <span class="nav-text">NVMを設定しておく</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hello_Worldするかしら"><span class="nav-number">3.</span> <span class="nav-text">Hello Worldするかしら</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#おわり"><span class="nav-number">4.</span> <span class="nav-text">おわり</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考サイト様"><span class="nav-number">5.</span> <span class="nav-text">参考サイト様</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
@@ -906,8 +897,8 @@
 
     <script type="text/javascript">
       var disqus_shortname = 'azunyan';
-      var disqus_identifier = '2015/04/22/GitHubとHexoが火を噴いた/';
-      var disqus_url = 'http://pitekusu.github.io/2015/04/22/GitHubとHexoが火を噴いた/';
+      var disqus_identifier = '2015/05/08/GitHubとHexoが火を噴いた3/';
+      var disqus_url = 'http://pitekusu.github.io/2015/05/08/GitHubとHexoが火を噴いた3/';
 
       (function(){
         var dsq = document.createElement('script');
