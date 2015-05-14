@@ -20,7 +20,7 @@
 
 
 
-  <meta name="keywords" content="Linux,Webサービス," />
+  <meta name="keywords" content="Linux,github," />
 
 
 
@@ -33,7 +33,7 @@
 
 
 
-  <title> GitHubとHexoが火を噴いた(第1回) // あずにゃんインフラ技術 </title>
+  <title> GitHubとHexoが火を噴いた(第4回) // あずにゃんインフラ技術 </title>
 </head>
 
 <body>
@@ -120,7 +120,7 @@
           
           
             
-              GitHubとHexoが火を噴いた(第1回)
+              GitHubとHexoが火を噴いた(第4回)
             
           
         </h1>
@@ -128,7 +128,7 @@
 
       <div class="post-meta">
         <span class="post-time">
-          Posted on 2015-04-22
+          Posted on 2015-05-14
         </span>
 
         
@@ -148,8 +148,8 @@
           
             <span class="post-comments-count">
             &nbsp; | &nbsp;
-            <a href="/2015/04/22/GitHubとHexoが火を噴いた/#comments" >
-              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/04/22/GitHubとHexoが火を噴いた/"></span>
+            <a href="/2015/05/14/GitHubとHexoが火を噴いた4/#comments" >
+              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/05/14/GitHubとHexoが火を噴いた4/"></span>
             </a>
           </span>
           
@@ -163,45 +163,9 @@
       
 
       
-        <h2 id="はじめに">はじめに</h2><p>最近は会社が大変ヒマでして、社内ニートな私にとって技術の勉強をしているように見せかけつつ趣味に走ることがマイブームとなっております。そんな私に与えられたおもちゃは仮想環境であるVmware社のESXi。そしてネット環境。いろいろ試してみたくなっちゃいます。</p>
-<a id="more"></a>
-<h3 id="そういえば最近ブログ更新してないな～">そういえば最近ブログ更新してないな～</h3><p>昔、Googleサイトでブログチックなサイトを開設したのですが、いかんせん管理が難しくすぐに挫折してしまいました。そこで今回暇つぶしにネット見てたら見つけたのがこの2つの組み合わせ。</p>
-<ul>
-<li>Github</li>
-<li>Hexo</li>
-</ul>
-<p>どっちもきいたことがない！Githubっていうのはたま～にエンジニアの皆様のツイートでお見かけするのですが、Hexoっていうのは全くわからん！ということで一から調べることにしました。</p>
-<h2 id="GithubとHexoについて調べてみた">GithubとHexoについて調べてみた</h2><h3 id="Github">Github</h3><p><a href="https://github.com" target="_blank" rel="external"><img src="http://i.imgur.com/oQ0F5OD.png" alt="GitHubの公式ページ"></a></p>
-<blockquote>
-<p>GitHub（ギットハブ）はソフトウェア開発プロジェクトのための共有ウェブサービスであり、Gitバージョン管理システムを使用する。<br><a href="http://ja.wikipedia.org/wiki/GitHub" target="_blank" rel="external">Github(ウィキペディア)</a>  </p>
-</blockquote>
-<hr>
-<p>そう！そういう話は聞いたことありました。でもそれってブログと関係ねえじゃん？どういうことでしょうか。<br>もう少し調べてみたら、Githubのサービスの中に<a href="https://pages.github.com" target="_blank" rel="external">Github Pages</a>なるものがあることが判明。こいつは昔流行ったWebのレンタルサーバに似てるようだ。そしてその特徴がこちら。</p>
-<ul>
-<li>無料！</li>
-<li>広告なし！</li>
-<li>容量無制限！らしい（一応制限はあるらしいけどソフトクォータ的な制限とのこと）</li>
-<li>独自ドメインにできる！→これに関しては元のドメインがかっこいいから私はこのままいきます</li>
-<li>静的ページのみ対応</li>
-</ul>
-<p>素敵です！昔私はInfoseekでゴミみたいなページを公開して黒歴史化したので、こういったサービスがあるとまた歴史を繰り返したくなります！<br>ところで静的ページとはなんでしょうか？知らない言葉だらけです。軽く調べてみると、サーバサイド側の処理が必要なものっぽい？PHPとかのことでしょうか。こういうのが使えないって思うとかっちょいいページは作れないのかなと思ったのですが、最近はそうではないようです。<br>どうやらチョベリグ静的ページを簡単に実現するのが<strong>Hexo</strong>というもののようだ！</p>
-<h3 id="Hexo">Hexo</h3><p><a href="https://hexo.io" target="_blank" rel="external"><img src="http://i.imgur.com/i5Y0XNE.png" alt="hexoの公式ページ"></a></p>
-<blockquote>
-<p>A fast, simple &amp; powerful blog framework  </p>
-</blockquote>
-<hr>
-<p>速くてシンプルで強力とは！相当凄いに違いありません。<br>Hexoというのは静的サイトジェネレータというサービスの1つらしく、PHP等を使うことなく、クライアントサイド側の処理のみで死ぬほど簡単に洒落たページが作れるようです。また、静的ページなので動作も高速とのこと。これはいいぞ～<br>さらに作ったページを他のホスティングサービスにデプロイして公開することも簡単にできるとのこと。なるほど、ここでGithub Pagesがでできるわけですね。<br>一番人気のある静的サイトジェネレータは<a href="http://jekyllrb.com/" target="_blank" rel="external">Jekyll</a>  というものらしいのですが、静的サイトジェネレータを知ったきっかけがHexoだったので、今回はHexoでいきます。  </p>
-<p>静的サイトジェネレータには、大きく分けてRubyかJavaScriptで作られているようです。今回採用したHexoはJavaScriptで作られており、Rubyを新たに導入する必要はなさそうです。楽です。  </p>
-<p>そしてHexoの特徴はこちら。</p>
-<ul>
-<li>コマンドがめっちゃ簡単</li>
-<li>マークダウンをサポート。これ嬉しい！</li>
-<li>テーマ（デザインのテンプレート）がたくさんある</li>
-<li>JavaScript製<strong>(node.js)</strong></li>
-</ul>
-<p>ここで出てきた<a href="https://nodejs.org" target="_blank" rel="external">node.js</a>  というのが画期的なものらしく、私は全く専門外なので何もわかりませんがとにかくすごいということはわかりました。JavaScriptだけどサーバサイドで処理するってことだけわかった。普通のJavaScriptさえろくにかけない私にとっては完全に魔法の世界です。</p>
-<h2 id="次回">次回</h2><p>GithubにサインアップしてGithub Pagesにリポジトリを作成しようと思います。まだMarkdown記述になれていないので時間がかかっていますが、だんだん慣れてくれば早く描けるようになってくるでしょう。それではまた次回お会いしましょう。<strong><em>あずにゃん可愛い</em></strong></p>
-
+        <h2 id="はじめに">はじめに</h2><p><a href="http://pitekusu.github.io/2015/05/08/GitHub%E3%81%A8Hexo%E3%81%8C%E7%81%AB%E3%82%92%E5%99%B4%E3%81%84%E3%81%9F3/" target="_blank" rel="external">前回</a>で、  Hexoをインストールする準備が終わりました。いよいよHexoをインストールかと思いきや、Github Pagesの作成をしてなかったので、まずそれをやりたいと思います。</p>
+<h2 id="Github_Pagesの作成">Github Pagesの作成</h2><h3 id="サインアップ">サインアップ</h3><p><img src="http://i.imgur.com/KQ5FPgc.png" alt="Imgur"><br><a href="https://github.com/" target="_blank" rel="external">Github</a>にアクセスして、右上の”Sign up”をクリックします。<br>そうするとパスワードやらユーザ名やら入れる画面になるので、入力します。<br>ここで作成するユーザ名が、ウェブページのURLに関わってくるのであんまり適当なのにするとショックでかいです。azunyanのような超大人気ユーザ名は基本的に取れないので悲しみに暮れるばかりです。<br><img src="http://i.imgur.com/Mv1dsj5.png" alt="Imgur"><br>有料プランが提示されます。プライベートリポジトリがほしい人は有料になりますが、Github Pages目的であればいらないので<strong>Free</strong>を選択しておきます。</p>
+<h3 id="リポジトリ作成">リポジトリ作成</h3><h3 id="SSH公開鍵登録">SSH公開鍵登録</h3><h3 id="確認してみる">確認してみる</h3><h2 id="おわり">おわり</h2>
       
     </div>
 
@@ -211,7 +175,7 @@
           
             <a href="/tags/Linux/"> #Linux </a>
           
-            <a href="/tags/Webサービス/"> #Webサービス </a>
+            <a href="/tags/github/"> #github </a>
           
         </div>
       
@@ -220,11 +184,11 @@
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/04/23/GitHubとHexoが火を噴いた2/">GitHubとHexoが火を噴いた(第2回)</a>
-            
           </div>
 
           <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/05/08/GitHubとHexoが火を噴いた3/">GitHubとHexoが火を噴いた(第3回)</a>
             
           </div>
         </div>
@@ -336,7 +300,7 @@
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#はじめに"><span class="nav-number">1.</span> <span class="nav-text">はじめに</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#そういえば最近ブログ更新してないな～"><span class="nav-number">1.1.</span> <span class="nav-text">そういえば最近ブログ更新してないな～</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GithubとHexoについて調べてみた"><span class="nav-number">2.</span> <span class="nav-text">GithubとHexoについて調べてみた</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Github"><span class="nav-number">2.1.</span> <span class="nav-text">Github</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hexo"><span class="nav-number">2.2.</span> <span class="nav-text">Hexo</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#次回"><span class="nav-number">3.</span> <span class="nav-text">次回</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#はじめに"><span class="nav-number">1.</span> <span class="nav-text">はじめに</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Github_Pagesの作成"><span class="nav-number">2.</span> <span class="nav-text">Github Pagesの作成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#サインアップ"><span class="nav-number">2.1.</span> <span class="nav-text">サインアップ</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#リポジトリ作成"><span class="nav-number">2.2.</span> <span class="nav-text">リポジトリ作成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SSH公開鍵登録"><span class="nav-number">2.3.</span> <span class="nav-text">SSH公開鍵登録</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#確認してみる"><span class="nav-number">2.4.</span> <span class="nav-text">確認してみる</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#おわり"><span class="nav-number">3.</span> <span class="nav-text">おわり</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
@@ -906,8 +870,8 @@
 
     <script type="text/javascript">
       var disqus_shortname = 'azunyan';
-      var disqus_identifier = '2015/04/22/GitHubとHexoが火を噴いた/';
-      var disqus_url = 'http://pitekusu.github.io/2015/04/22/GitHubとHexoが火を噴いた/';
+      var disqus_identifier = '2015/05/14/GitHubとHexoが火を噴いた4/';
+      var disqus_url = 'http://pitekusu.github.io/2015/05/14/GitHubとHexoが火を噴いた4/';
 
       (function(){
         var dsq = document.createElement('script');
