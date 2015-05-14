@@ -4,7 +4,7 @@
   
   <link href="/atom.xml" rel="self"/>
   <link href="http://pitekusu.github.io/"/>
-  <updated>2015-05-14T02:20:02.000Z</updated>
+  <updated>2015-05-14T02:29:20.000Z</updated>
   <id>http://pitekusu.github.io/</id>
   
   <author>
@@ -19,11 +19,12 @@
     <link href="http://pitekusu.github.io/2015/05/14/GitHub%E3%81%A8Hexo%E3%81%8C%E7%81%AB%E3%82%92%E5%99%B4%E3%81%84%E3%81%9F4/"/>
     <id>http://pitekusu.github.io/2015/05/14/GitHubとHexoが火を噴いた4/</id>
     <published>2015-05-14T01:46:33.000Z</published>
-    <updated>2015-05-14T02:20:02.000Z</updated>
+    <updated>2015-05-14T02:29:20.000Z</updated>
     <content type="html"><![CDATA[<h2 id="はじめに">はじめに</h2><p><a href="http://pitekusu.github.io/2015/05/08/GitHub%E3%81%A8Hexo%E3%81%8C%E7%81%AB%E3%82%92%E5%99%B4%E3%81%84%E3%81%9F3/" target="_blank" rel="external">前回</a>で、  Hexoをインストールする準備が終わりました。いよいよHexoをインストールかと思いきや、Github Pagesの作成をしてなかったので、まずそれをやりたいと思います。</p>
 <a id="more"></a>
-<h2 id="Github_Pagesの作成">Github Pagesの作成</h2><h3 id="サインアップ">サインアップ</h3><p><img src="http://i.imgur.com/KQ5FPgc.png" alt="Imgur"><br><a href="https://github.com/" target="_blank" rel="external">Github</a>にアクセスして、右上の”Sign up”をクリックします。<br>そうするとパスワードやらユーザ名やら入れる画面になるので、入力します。<br>ここで作成するユーザ名が、ウェブページのURLに関わってくるのであんまり適当なのにするとショックでかいです。azunyanのような超大人気ユーザ名は基本的に取れないので悲しみに暮れるばかりです。<br><img src="http://i.imgur.com/Mv1dsj5.png" alt="Imgur"><br>有料プランが提示されます。プライベートリポジトリがほしい人は有料になりますが、Github Pages目的であればいらないので<strong>Free</strong>を選択しておきます。</p>
-<h3 id="リポジトリ作成">リポジトリ作成</h3><h3 id="SSH公開鍵登録">SSH公開鍵登録</h3><h3 id="確認してみる">確認してみる</h3><h2 id="おわり">おわり</h2>]]></content>
+<h2 id="Github_Pagesの作成">Github Pagesの作成</h2><h3 id="サインアップ">サインアップ</h3><p><img src="http://i.imgur.com/KQ5FPgc.png" alt="Imgur"><br><a href="https://github.com/" target="_blank" rel="external">Github</a>にアクセスして、右上の”Sign up”をクリックします。<br>そうするとパスワードやらユーザ名やら入れる画面になるので、入力します。<br>ここで作成するユーザ名が、ウェブページのURLに関わってくるのであんまり適当なのにするとショックでかいです。azunyanのような超大人気ユーザ名は基本的に取れないので悲しみに暮れるばかりです。<br><img src="http://i.imgur.com/Mv1dsj5.png" alt="Imgur"><br>有料プランが提示されます。プライベートリポジトリがほしい人は有料になりますが、Github Pages目的であればいらないので <strong>Free</strong> を選択しておきます。<br><img src="http://i.imgur.com/EHh8WOj.png" alt="Imgur"><br>これで確か登録したメールアドレス宛てに確認のメールが来るので、認証しておきます。サインアップは終了です。簡単すぎワロタ</p>
+<h3 id="リポジトリ作成">リポジトリ作成</h3><p>右下の方に <strong>New Repository</strong> という緑色のボタンがあるので、これをクリックします。<br><img src="http://i.imgur.com/CatTTuc.png" alt="Imgur"><br><strong>Repository name</strong> に、 <code>ユーザ名.github.io</code> と入力します。このリポジトリ名にするとGithub Pages用のリポジトリになります。<br><img src="http://i.imgur.com/7qEL0eP.png" alt="Imgur"><br>このページが表示されたらリポジトリの作成も完了です。簡単すぎワロタ<br><img src="http://i.imgur.com/Lm6GlRG.png" alt="Imgur"></p>
+<h3 id="SSH公開鍵登録">SSH公開鍵登録</h3><h3 id="確認してみる">確認してみる</h3><h2 id="おわり">おわり</h2>]]></content>
     <summary type="html">
     <![CDATA[<h2 id="はじめに">はじめに</h2><p><a href="http://pitekusu.github.io/2015/05/08/GitHub%E3%81%A8Hexo%E3%81%8C%E7%81%AB%E3%82%92%E5%99%B4%E3%81%84%E3%81%9F3/">前回</a>で、  Hexoをインストールする準備が終わりました。いよいよHexoをインストールかと思いきや、Github Pagesの作成をしてなかったので、まずそれをやりたいと思います。</p>]]>
     
