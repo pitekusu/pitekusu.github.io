@@ -1,0 +1,1028 @@
+<!doctype html>
+<html class="theme-next use-motion ">
+<head>
+  
+
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+  <meta name="google-site-verification" content="bv4wTsKmdm4Mhz4U0YzekmG0tbw3ghuy1l4i_SZ2qmY" />
+
+
+
+  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.2"/>
+
+
+
+
+  <meta name="keywords" content="Linux,RAID,ZFS," />
+
+
+
+  <link rel="alternate" href="http://pitekusu.github.io/atom.xml" title="あずにゃんインフラ技術" type="application/atom+xml" />
+
+
+
+  <link rel="shorticon icon" type="image/x-icon" href="/favicon.ico?v=0.4.2" />
+
+
+
+
+  <title> ZFS on Linuxを仮想CentOS7上で検証した // あずにゃんインフラ技術 </title>
+</head>
+
+<body>
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <div id="header" class="header">
+      <div class="header-inner">
+        <h1 class="site-meta">
+  <span class="logo-line-before"><i></i></span>
+  <a href="/" class="brand">
+      <span class="logo">
+        <i class="icon-logo"></i>
+      </span>
+      <span class="site-title">あずにゃんインフラ技術</span>
+  </a>
+  <span class="logo-line-after"><i></i></span>
+</h1>
+
+
+  <ul id="menu" class="menu">
+     
+    
+      
+      <li class="menu-item menu-item-home">
+        <a href="/">
+          <i class="menu-item-icon icon-home"></i> <br />
+          Home
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-categories">
+        <a href="/categories">
+          <i class="menu-item-icon icon-categories"></i> <br />
+          Categories
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-archives">
+        <a href="/archives">
+          <i class="menu-item-icon icon-archives"></i> <br />
+          Archives
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-tags">
+        <a href="/tags">
+          <i class="menu-item-icon icon-tags"></i> <br />
+          Tags
+        </a>
+      </li>
+    
+      
+      <li class="menu-item menu-item-about">
+        <a href="/about">
+          <i class="menu-item-icon icon-about"></i> <br />
+          About
+        </a>
+      </li>
+    
+  </ul>
+
+
+      </div>
+    </div>
+
+    <div id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content">
+          
+
+  <div id="posts" class="posts-expand">
+    
+
+  <div class="post post-type-normal ">
+    <div class="post-header">
+
+      
+      
+        <h1 class="post-title">
+          
+          
+            
+              ZFS on Linuxを仮想CentOS7上で検証した
+            
+          
+        </h1>
+      
+
+      <div class="post-meta">
+        <span class="post-time">
+          Posted on 2015-05-21
+        </span>
+
+        
+          <span class="post-category">
+            &nbsp; | &nbsp; In
+            
+              <a href="/categories/技術/">技術</a>
+
+              
+              
+
+            
+          </span>
+        
+
+        
+          
+            <span class="post-comments-count">
+            &nbsp; | &nbsp;
+            <a href="/2015/05/21/ZFS on Linuxを仮想CentOS7上で検証してみた/#comments" >
+              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/05/21/ZFS on Linuxを仮想CentOS7上で検証してみた/"></span>
+            </a>
+          </span>
+          
+        
+      </div>
+    </div>
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <h2 id="はじめに">はじめに</h2><p>我が家のストレージサーバは<a href="http://www.freenas.org/" target="_blank" rel="external">FreeNAS</a>っていうソフトで運用してます。こいつはFreeBSD上で動くやつで、大変簡単に高価なストレージサーバレベルの機能を使用できる優れものです。FreeNASでは、RAIDを使うことはもちろんのこと、ZFSというファイルシステムを使用してファイルシステム上でRAID機能を実現することができます。今回はこのZFSについて簡単にメモしつつ、Linux上でZFSを使うことができるZFS on Linuxを使ってみようと思います。また、ZFSの機能を色々検証してみたのでそれもメモとして残しておきます。</p>
+<a id="more"></a>
+<h2 id="ZFSのすごいところ">ZFSのすごいところ</h2><p>ZFSはオラクルによって開発されたファイルシステムで、以下のような特徴があります。</p>
+<ul>
+<li>RAID機能がある</li>
+<li>スナップショットが取れる</li>
+<li>めっちゃ簡単、コマンド一行で終わる</li>
+<li>ホットスペア対応</li>
+<li>重複排除機能がある</li>
+<li>割とメモリー容量を欲する</li>
+</ul>
+<p>実に便利そうですなあ。メモリー以外。メモリー容量が少ないとカーネルパニック起こすらしいので注意です。</p>
+<h3 id="RAID-Zについて">RAID-Zについて</h3><p>ZFSが実装しているRAIDは、RAID-Zと呼ばれてます。<br>RAID-Z1がRAID5相当にあたります。いまはRAID-Z3までありトリプルパリティまでいけます。<br>あとRAIDでは「RAID5書き込みホール」問題というものがあります。データとパリティの間で不整合が起きる問題のことで、一見正常に動いているように見えていても徐々にデータが破壊されていくというオバケめいた問題です。この問題は停電やクラッシュで発生するようで、これを防ぐためにハードウェアRAIDではバッテリーを積んで防いでいるようです。おっかないです。RAID-Zを使用すると、この問題が起きないそうです。理由としてはコピーオンライト機能と可変ストライプ幅によるものと記載されていることが多いのですが、詳しいアーキテクチャについては難しくて謎です。特に可変ストライプ幅についてはいろいろ意見があるようなので特に謎です。</p>
+<h2 id="ZFS_on_Linux">ZFS on Linux</h2><h3 id="今回の仮想マシン">今回の仮想マシン</h3><p>早速インストールしてみたいと思います。例にもよって仮想環境を構築しました。今回はこんな感じのスペックです。</p>
+<ul>
+<li>CPU：1ソケット2コア</li>
+<li>ハードディスク：8GB×5本</li>
+<li>NIC：VMXNET3</li>
+<li>OS：CentOS7 最小インストール</li>
+</ul>
+<p>いつも邪魔ばっかしてくるSELinuxとかは既に止めてあります。<br>あ、あと下のコマンドラインに出てくる容量表示は今回の値とは異なってる場合があるんで気にしないでください。</p>
+<h3 id="ZFS_on_Linuxのインストール">ZFS on Linuxのインストール</h3><p><a href="http://zfsonlinux.org/" target="_blank" rel="external">公式ページ</a>を参考にインストールしていきます。<br>まずはEPELという外部リポジトリをインストールします。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum localinstall --nogpgcheck https://download.fedoraproject.org/pub/epel/<span class="number">7</span>/x86_64/e/epel-release-<span class="number">7</span>-<span class="number">5</span>.noarch.rpm</span><br><span class="line">読み込んだプラグイン:fastestmirror</span><br><span class="line">epel-release-<span class="number">7</span>-<span class="number">5</span>.noarch.rpm                                                  |  <span class="number">14</span> kB  <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br><span class="line">/var/tmp/yum-root-<span class="number">1</span>fgyJT/epel-release-<span class="number">7</span>-<span class="number">5</span>.noarch.rpm を調べています: epel-release-<span class="number">7</span>-<span class="number">5</span>.noarch</span><br><span class="line">/var/tmp/yum-root-<span class="number">1</span>fgyJT/epel-release-<span class="number">7</span>-<span class="number">5</span>.noarch.rpm をインストール済みとして設定しています</span><br><span class="line">依存性の解決をしています</span><br><span class="line">--&gt; トランザクションの確認を実行しています。</span><br><span class="line">---&gt; パッケージ epel-release.noarch <span class="number">0</span>:<span class="number">7</span>-<span class="number">5</span> を インストール</span><br><span class="line">--&gt; 依存性解決を終了しました。</span><br><span class="line"></span><br><span class="line">依存性を解決しました</span><br><span class="line"></span><br><span class="line">====================================================================================================</span><br><span class="line"> Package                 アーキテクチャー  バージョン     リポジトリー                         容量</span><br><span class="line">====================================================================================================</span><br><span class="line">インストール中:</span><br><span class="line"> epel-release            noarch            <span class="number">7</span>-<span class="number">5</span>            /epel-release-<span class="number">7</span>-<span class="number">5</span>.noarch             <span class="number">24</span> k</span><br><span class="line"></span><br><span class="line">トランザクションの要約</span><br><span class="line">====================================================================================================</span><br><span class="line">インストール  <span class="number">1</span> パッケージ</span><br><span class="line"></span><br><span class="line">合計容量: <span class="number">24</span> k</span><br><span class="line">インストール容量: <span class="number">24</span> k</span><br><span class="line">Is this ok [y/d/N]: y</span><br><span class="line">Downloading packages:</span><br><span class="line">Running transaction check</span><br><span class="line">Running transaction <span class="built_in">test</span></span><br><span class="line">Transaction <span class="built_in">test</span> succeeded</span><br><span class="line">Running transaction</span><br><span class="line">  インストール中          : epel-release-<span class="number">7</span>-<span class="number">5</span>.noarch                                             <span class="number">1</span>/<span class="number">1</span></span><br><span class="line">  検証中                  : epel-release-<span class="number">7</span>-<span class="number">5</span>.noarch                                             <span class="number">1</span>/<span class="number">1</span></span><br><span class="line"></span><br><span class="line">インストール:</span><br><span class="line">  epel-release.noarch <span class="number">0</span>:<span class="number">7</span>-<span class="number">5</span></span><br><span class="line"></span><br><span class="line">完了しました!</span><br></pre></td></tr></table></figure>
+<p>次に、ZFSのRPMパッケージをダウンロードします。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum localinstall --nogpgcheck http://archive.zfsonlinux.org/epel/zfs-release.el7.noarch.rpm</span><br><span class="line">読み込んだプラグイン:fastestmirror</span><br><span class="line">zfs-release.el7.noarch.rpm                                                   | <span class="number">4.3</span> kB  <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br><span class="line">/var/tmp/yum-root-<span class="number">1</span>fgyJT/zfs-release.el7.noarch.rpm を調べています: zfs-release-<span class="number">1</span>-<span class="number">2</span>.el7.centos.noarch</span><br><span class="line">/var/tmp/yum-root-<span class="number">1</span>fgyJT/zfs-release.el7.noarch.rpm をインストール済みとして設定しています</span><br><span class="line">依存性の解決をしています</span><br><span class="line">--&gt; トランザクションの確認を実行しています。</span><br><span class="line">---&gt; パッケージ zfs-release.noarch <span class="number">0</span>:<span class="number">1</span>-<span class="number">2</span>.el7.centos を インストール</span><br><span class="line">--&gt; 依存性解決を終了しました。</span><br><span class="line"></span><br><span class="line">依存性を解決しました</span><br><span class="line"></span><br><span class="line">====================================================================================================</span><br><span class="line"> Package             アーキテクチャー</span><br><span class="line">                                    バージョン                リポジトリー                     容量</span><br><span class="line">====================================================================================================</span><br><span class="line">インストール中:</span><br><span class="line"> zfs-release         noarch         <span class="number">1</span>-<span class="number">2</span>.el7.centos            /zfs-release.el7.noarch         <span class="number">2.4</span> k</span><br><span class="line"></span><br><span class="line">トランザクションの要約</span><br><span class="line">====================================================================================================</span><br><span class="line">インストール  <span class="number">1</span> パッケージ</span><br><span class="line"></span><br><span class="line">合計容量: <span class="number">2.4</span> k</span><br><span class="line">インストール容量: <span class="number">2.4</span> k</span><br><span class="line">Is this ok [y/d/N]: y</span><br><span class="line">Downloading packages:</span><br><span class="line">Running transaction check</span><br><span class="line">Running transaction <span class="built_in">test</span></span><br><span class="line">Transaction <span class="built_in">test</span> succeeded</span><br><span class="line">Running transaction</span><br><span class="line">  インストール中          : zfs-release-<span class="number">1</span>-<span class="number">2</span>.el7.centos.noarch                                   <span class="number">1</span>/<span class="number">1</span></span><br><span class="line">  検証中                  : zfs-release-<span class="number">1</span>-<span class="number">2</span>.el7.centos.noarch                                   <span class="number">1</span>/<span class="number">1</span></span><br><span class="line"></span><br><span class="line">インストール:</span><br><span class="line">  zfs-release.noarch <span class="number">0</span>:<span class="number">1</span>-<span class="number">2</span>.el7.centos</span><br><span class="line"></span><br><span class="line">完了しました!</span><br></pre></td></tr></table></figure>
+<p>準備が整ったので、kernel-develというのとZFSをインストールします。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># sudo yum install kernel-devel zfs</span></span><br><span class="line">読み込んだプラグイン:fastestmirror</span><br><span class="line">epel/x86_64/metalink                                                         | <span class="number">4.6</span> kB  <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br><span class="line">epel                                                                         | <span class="number">4.4</span> kB  <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br><span class="line">zfs                                                                          | <span class="number">2.9</span> kB  <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br><span class="line">(<span class="number">1</span>/<span class="number">3</span>): epel/x86_64/group_gz                                                  | <span class="number">169</span> kB  <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br><span class="line">(<span class="number">2</span>/<span class="number">3</span>): epel/x86_64/primary_db                                                | <span class="number">3.5</span> MB  <span class="number">00</span>:<span class="number">00</span>:<span class="number">01</span></span><br><span class="line">(<span class="number">3</span>/<span class="number">3</span>): zfs/x86_64/primary_db                                                 |  <span class="number">31</span> kB  <span class="number">00</span>:<span class="number">00</span>:<span class="number">01</span></span><br><span class="line">(<span class="number">1</span>/<span class="number">2</span>): epel/x86_64/updateinfo                                                | <span class="number">365</span> kB  <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br><span class="line">(<span class="number">2</span>/<span class="number">2</span>): epel/x86_64/pkgtags                                                   | <span class="number">1.5</span> MB  <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br><span class="line"></span><br><span class="line">～(省略)～</span><br><span class="line"></span><br><span class="line">  spl-dkms.noarch <span class="number">0</span>:<span class="number">0.6</span>.<span class="number">4.1</span>-<span class="number">1</span>.el7.centos            zfs-dkms.noarch <span class="number">0</span>:<span class="number">0.6</span>.<span class="number">4.1</span>-<span class="number">1</span>.el7.centos</span><br><span class="line"></span><br><span class="line">完了しました!</span><br></pre></td></tr></table></figure>
+<p>インストール完了です。簡単です。</p>
+<p>ちゃんとインストールできているか確認してみましょう。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">$ cat /proc/filesystems</span><br><span class="line">nodev   sysfs</span><br><span class="line">nodev   rootfs</span><br><span class="line">nodev   bdev</span><br><span class="line">nodev   proc</span><br><span class="line">nodev   cgroup</span><br><span class="line">nodev   cpuset</span><br><span class="line">nodev   tmpfs</span><br><span class="line">nodev   devtmpfs</span><br><span class="line">nodev   debugfs</span><br><span class="line">nodev   securityfs</span><br><span class="line">nodev   sockfs</span><br><span class="line">nodev   pipefs</span><br><span class="line">nodev   anon_inodefs</span><br><span class="line">nodev   configfs</span><br><span class="line">nodev   devpts</span><br><span class="line">nodev   ramfs</span><br><span class="line">nodev   hugetlbfs</span><br><span class="line">nodev   autofs</span><br><span class="line">nodev   pstore</span><br><span class="line">nodev   mqueue</span><br><span class="line">        xfs</span><br><span class="line">nodev   zfs</span><br></pre></td></tr></table></figure>
+<p>一番下に<code>zfs</code>と表示されています。問題なさそうです。</p>
+<h3 id="ZFSプール作成">ZFSプール作成</h3><p>まず、現状のデバイス状況を確認してみます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">$ parted <span class="operator">-l</span></span><br><span class="line">モデル: VMware Virtual disk (scsi)</span><br><span class="line">ディスク /dev/sda: <span class="number">17.2</span>GB</span><br><span class="line">セクタサイズ (論理/物理): <span class="number">512</span>B/<span class="number">512</span>B</span><br><span class="line">パーティションテーブル: msdos</span><br><span class="line">ディスクフラグ:</span><br><span class="line"></span><br><span class="line">番号  開始    終了    サイズ  タイプ   ファイルシステム  フラグ</span><br><span class="line"> <span class="number">1</span>    <span class="number">1049</span>kB  <span class="number">525</span>MB   <span class="number">524</span>MB   primary  xfs               boot</span><br><span class="line"> <span class="number">2</span>    <span class="number">525</span>MB   <span class="number">17.2</span>GB  <span class="number">16.7</span>GB  primary                    lvm</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">エラー: /dev/sdb: ディスクラベルが認識できません。</span><br><span class="line">モデル: VMware Virtual disk (scsi)</span><br><span class="line">ディスク /dev/sdb: <span class="number">17.2</span>GB</span><br><span class="line">セクタサイズ (論理/物理): <span class="number">512</span>B/<span class="number">512</span>B</span><br><span class="line">パーティションテーブル: unknown</span><br><span class="line">ディスクフラグ:</span><br><span class="line"></span><br><span class="line">エラー: /dev/sdc: ディスクラベルが認識できません。</span><br><span class="line">モデル: VMware Virtual disk (scsi)</span><br><span class="line">ディスク /dev/sdc: <span class="number">17.2</span>GB</span><br><span class="line">セクタサイズ (論理/物理): <span class="number">512</span>B/<span class="number">512</span>B</span><br><span class="line">パーティションテーブル: unknown</span><br><span class="line">ディスクフラグ:</span><br><span class="line"></span><br><span class="line">エラー: /dev/sdd: ディスクラベルが認識できません。</span><br><span class="line">モデル: VMware Virtual disk (scsi)</span><br><span class="line">ディスク /dev/sdd: <span class="number">17.2</span>GB</span><br><span class="line">セクタサイズ (論理/物理): <span class="number">512</span>B/<span class="number">512</span>B</span><br><span class="line">パーティションテーブル: unknown</span><br><span class="line">ディスクフラグ:</span><br><span class="line"></span><br><span class="line">エラー: /dev/sde: ディスクラベルが認識できません。</span><br><span class="line">モデル: VMware Virtual disk (scsi)</span><br><span class="line">ディスク /dev/sde: <span class="number">17.2</span>GB</span><br><span class="line">セクタサイズ (論理/物理): <span class="number">512</span>B/<span class="number">512</span>B</span><br><span class="line">パーティションテーブル: unknown</span><br><span class="line">ディスクフラグ:</span><br><span class="line"></span><br><span class="line">モデル: Linux device-mapper (linear) (dm)</span><br><span class="line">ディスク /dev/mapper/centos-root: <span class="number">14.9</span>GB</span><br><span class="line">セクタサイズ (論理/物理): <span class="number">512</span>B/<span class="number">512</span>B</span><br><span class="line">パーティションテーブル: loop</span><br><span class="line">ディスクフラグ:</span><br><span class="line"></span><br><span class="line">番号  開始   終了    サイズ  ファイルシステム  フラグ</span><br><span class="line"> <span class="number">1</span>    <span class="number">0.00</span>B  <span class="number">14.9</span>GB  <span class="number">14.9</span>GB  xfs</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">モデル: Linux device-mapper (linear) (dm)</span><br><span class="line">ディスク /dev/mapper/centos-swap: <span class="number">1720</span>MB</span><br><span class="line">セクタサイズ (論理/物理): <span class="number">512</span>B/<span class="number">512</span>B</span><br><span class="line">パーティションテーブル: loop</span><br><span class="line">ディスクフラグ:</span><br><span class="line"></span><br><span class="line">番号  開始   終了    サイズ  ファイルシステム  フラグ</span><br><span class="line"> <span class="number">1</span>    <span class="number">0.00</span>B  <span class="number">1720</span>MB  <span class="number">1720</span>MB  linux-swap(v1)</span><br></pre></td></tr></table></figure>
+<p><code>sda</code>がLinuxがインストールされているデバイスのようです。<br><code>sdb</code>とか<code>sdc</code>がまだ何もフォーマットされてないディスクたちです。</p>
+<p>さっそくZFSプールを作成してみます。<br>ZFSでは基本的に<code>zfs</code>コマンドか<code>zpool</code>コマンドしか使いません。単純明快なところが助かります。今回は調子に乗ってトリプルパリティであるRAID-Z3にします。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ zpool create tank raidz3 /dev/sdb /dev/sdc /dev/sdd /dev/sde /dev/sdf</span><br><span class="line">invalid vdev specification</span><br><span class="line">use <span class="string">'-f'</span> to override the following errors:</span><br><span class="line">/dev/sdb does not contain an EFI label but it may contain partition</span><br><span class="line">information <span class="keyword">in</span> the MBR.</span><br></pre></td></tr></table></figure>
+<p>といった矢先にエラーが出た。EFIラベルが無いとかなんとかってかいてあります。なんか<code>-f</code>っていうオプションつけたらいけるって書いてあるのでやってみます。ちなみに<code>tank</code>というのはzfsでのプールにおける慣例的なディレクトリらしく、みんなそこにマウントするので私もそうします。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ zpool create tank raidz3 /dev/sdb /dev/sdc /dev/sdd /dev/sde /dev/sdf <span class="operator">-f</span></span><br><span class="line">$</span><br></pre></td></tr></table></figure>
+<p>何のエラーなく終わりました。行けたのかしら。<br><code>zpool</code>コマンドで確認してみます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ zpool list</span><br><span class="line">NAME   SIZE  ALLOC   FREE  EXPANDSZ   FRAG    CAP  DEDUP  HEALTH  ALTROOT</span><br><span class="line">tank  <span class="number">63.5</span>G   <span class="number">100</span>K  <span class="number">63.5</span>G         -     <span class="number">0</span>%     <span class="number">0</span>%  <span class="number">1.00</span>x  ONLINE  -</span><br></pre></td></tr></table></figure>
+<p>ちゃんとできてるっぽいです！</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ファイルシス            サイズ  使用  残り 使用% マウント位置</span><br><span class="line">/dev/mapper/centos-root    <span class="number">14</span>G  <span class="number">1.2</span>G   <span class="number">13</span>G    <span class="number">9</span>% /</span><br><span class="line">devtmpfs                  <span class="number">1.9</span>G     <span class="number">0</span>  <span class="number">1.9</span>G    <span class="number">0</span>% /dev</span><br><span class="line">tmpfs                     <span class="number">1.9</span>G     <span class="number">0</span>  <span class="number">1.9</span>G    <span class="number">0</span>% /dev/shm</span><br><span class="line">tmpfs                     <span class="number">1.9</span>G  <span class="number">8.5</span>M  <span class="number">1.9</span>G    <span class="number">1</span>% /run</span><br><span class="line">tmpfs                     <span class="number">1.9</span>G     <span class="number">0</span>  <span class="number">1.9</span>G    <span class="number">0</span>% /sys/fs/cgroup</span><br><span class="line">/dev/sda1                 <span class="number">497</span>M  <span class="number">151</span>M  <span class="number">347</span>M   <span class="number">31</span>% /boot</span><br><span class="line">tank                       <span class="number">16</span>G     <span class="number">0</span>   <span class="number">16</span>G    <span class="number">0</span>% /tank</span><br></pre></td></tr></table></figure>
+<p>なんと今の一行のコマンド一つでマウントまでされました。簡単すぎて泣きそう。</p>
+<p>以下のコマンドでZFSプールの状態を確認できます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ zpool status</span><br><span class="line">  pool: tank</span><br><span class="line"> state: ONLINE</span><br><span class="line">  scan: none requested</span><br><span class="line">config:</span><br><span class="line"></span><br><span class="line">        NAME        STATE     READ WRITE CKSUM</span><br><span class="line">        tank        ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">          raidz3-<span class="number">0</span>  ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdb     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdc     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdd     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sde     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdf     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line"></span><br><span class="line">errors: No known data errors</span><br></pre></td></tr></table></figure>
+<h3 id="重複排除の威力">重複排除の威力</h3><p>ZFSファイルシステムは、標準装備で重複排除機能を持っています。<br>ですが、デフォルトだと無効になっているのでまずは重複排除を有効化します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ zfs <span class="built_in">set</span> dedup=on tank</span><br></pre></td></tr></table></figure>
+<p>この状態で1GBのファイルを作成してみます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">if</span>=/dev/zero of=/tank/bigfile count=<span class="number">1024</span> bs=<span class="number">1</span>M</span><br></pre></td></tr></table></figure>
+<p>サイズを確認してみます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ ls -lha</span><br><span class="line">合計 <span class="number">1.0</span>G</span><br><span class="line">drwxr-xr-x   <span class="number">2</span> root root    <span class="number">3</span>  <span class="number">5</span>月 <span class="number">18</span> <span class="number">11</span>:<span class="number">57</span> .</span><br><span class="line">drwxr-xr-x. <span class="number">18</span> root root <span class="number">4.0</span>K  <span class="number">5</span>月 <span class="number">18</span> <span class="number">11</span>:<span class="number">44</span> ..</span><br><span class="line">-rw-r--r--   <span class="number">1</span> root root <span class="number">1.0</span>G  <span class="number">5</span>月 <span class="number">18</span> <span class="number">11</span>:<span class="number">57</span> bigfile</span><br></pre></td></tr></table></figure>
+<p>ちゃんと1GBのファイルが作成されています。普通のファイルシステムであれば、ストレージの容量も1GB分減っているはずです。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ zpool list</span><br><span class="line">NAME   SIZE  ALLOC   FREE  EXPANDSZ   FRAG    CAP  DEDUP  HEALTH  ALTROOT</span><br><span class="line">tank  <span class="number">39.8</span>G   <span class="number">980</span>K  <span class="number">39.7</span>G         -     <span class="number">0</span>%     <span class="number">0</span>%  <span class="number">8192.00</span>x  ONLINE  -</span><br></pre></td></tr></table></figure>
+<p>ALLOCというのが使用容量を示しています。なんと驚きの980KB!<br>今回の実験では高効率のゼロ埋めファイルですが、例えばメールデータのバックアップ先なんかにしたら文字情報しかない為に結構な高率で保存できると思います。</p>
+<h3 id="ZFSスナップショット機能">ZFSスナップショット機能</h3><p>次はスナップショットという機能を使ってみます。<br>ファイルを削除する前とかにスナップショットを取っておいて、なんかミスったらすぐに元に戻せるっていう機能です。<br>まずはスナップショットを作成します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ zfs snapshot tank@<span class="number">20150518</span></span><br></pre></td></tr></table></figure>
+<p>スナップショットを一覧するコマンドがあるので確認してみます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ zfs list -t snapshot</span><br><span class="line">NAME            USED  AVAIL  REFER  MOUNTPOINT</span><br><span class="line">tank@<span class="number">20150518</span>  <span class="number">1020</span>M      -  <span class="number">1020</span>M  -</span><br></pre></td></tr></table></figure>
+<p>ちゃんと作成されていました。1GB使用済みって表示されているので、そんなに容量喰うのかと思って<code>zpool list</code>を再確認。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ zpool list</span><br><span class="line">NAME   SIZE  ALLOC   FREE  EXPANDSZ   FRAG    CAP  DEDUP  HEALTH  ALTROOT</span><br><span class="line">tank  <span class="number">39.8</span>G  <span class="number">1.04</span>M  <span class="number">39.7</span>G         -     <span class="number">0</span>%     <span class="number">0</span>%  <span class="number">8192.00</span>x  ONLINE  -</span><br></pre></td></tr></table></figure>
+<p>よかった、60KB位しか増えてないようです。とりあえずこれでスナップショットはとれました。<br>ここで作成した空ファイルを削除します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ rm bigfile</span><br><span class="line">rm: 通常ファイル `bigfile<span class="string">' を削除しますか? y</span></span><br></pre></td></tr></table></figure>
+<p>これで<code>bigfile</code>は消えてなくなりました。<br>かわりに<code>smallfile</code>というファイルを作成しておきます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ dd <span class="keyword">if</span>=/dev/zero of=/tank/smallfile count=<span class="number">128</span> bs=<span class="number">1</span>M</span><br><span class="line"><span class="number">128</span>+<span class="number">0</span> レコード入力</span><br><span class="line"><span class="number">128</span>+<span class="number">0</span> レコード出力</span><br><span class="line"><span class="number">134217728</span> バイト (<span class="number">134</span> MB) コピーされました、 <span class="number">0.142223</span> 秒、 <span class="number">944</span> MB/秒</span><br></pre></td></tr></table></figure>
+<p>そして、さらにスナップショットを作成します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ zfs snapshot tank@<span class="number">20150518</span>-<span class="number">2</span></span><br></pre></td></tr></table></figure>
+<p>なぜここでスナップショットを撮ったのか？<br>なんとZFSはスナップショット同士を比較することができるのです。！<br>以下のコマンドで何が変わったかを確認することができます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># zfs diff tank@20150518 tank@20150518-2</span></span><br><span class="line">M       /tank/</span><br><span class="line">-       /tank/bigfile</span><br><span class="line">+       /tank/smallfile</span><br></pre></td></tr></table></figure>
+<p>表示された識別子で、何が変化したかを表してます。以下に表を置いておきます。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">識別子</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">M</td>
+<td>変更</td>
+</tr>
+<tr>
+<td style="text-align:center">-</td>
+<td>削除</td>
+</tr>
+<tr>
+<td style="text-align:center">+</td>
+<td>追加</td>
+</tr>
+<tr>
+<td style="text-align:center">R</td>
+<td>リネーム</td>
+</tr>
+</tbody>
+</table>
+<p><code>/tank</code>ディレクトリが変更され、<code>bigfile</code>が削除され<code>smallfile</code>が追加されたことがわかります。<br>もちろんロールバックも簡単です。やってみます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ zfs rollback tank@<span class="number">20150518</span></span><br></pre></td></tr></table></figure>
+<p>ちゃんと元に戻ってるか確認してみます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ ll</span><br><span class="line">合計 <span class="number">1044588</span></span><br><span class="line">-rw-r--r-- <span class="number">1</span> root root <span class="number">1073741824</span>  <span class="number">5</span>月 <span class="number">18</span> <span class="number">17</span>:<span class="number">19</span> bigfile</span><br></pre></td></tr></table></figure>
+<p>完璧に元に戻りました。<strong><em>神ゲー</em></strong></p>
+<h3 id="耐障害性の実験">耐障害性の実験</h3><p>RAID機能の力を見る時がやってきました。<br>あらためてZFSプールの状態を確認しておきます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ zpool status</span><br><span class="line">  pool: tank</span><br><span class="line"> state: ONLINE</span><br><span class="line">  scan: none requested</span><br><span class="line">config:</span><br><span class="line"></span><br><span class="line">        NAME        STATE     READ WRITE CKSUM</span><br><span class="line">        tank        ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">          raidz3-<span class="number">0</span>  ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdb     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdc     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdd     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sde     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdf     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line"></span><br><span class="line">errors: No known data errors</span><br></pre></td></tr></table></figure>
+<p>stateがONLINEと表示されています。問題ない状態です。</p>
+<p>仮想マシンのいいところでHDDをぶっさすのも引っこ抜くものも自由自在です。さっそくハードディスクを1本引き抜いてみます。<br><img src="http://i.imgur.com/GzQs4tW.png" alt="Imgur"></p>
+<p>再度ZFSプールの状態を確認します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">$ zpool status</span><br><span class="line">  pool: tank</span><br><span class="line"> state: DEGRADED</span><br><span class="line">status: One or more devices could not be used because the label is missing or</span><br><span class="line">        invalid.  Sufficient replicas exist <span class="keyword">for</span> the pool to <span class="built_in">continue</span></span><br><span class="line">        functioning <span class="keyword">in</span> a degraded state.</span><br><span class="line">action: Replace the device using <span class="string">'zpool replace'</span>.</span><br><span class="line">   see: http://zfsonlinux.org/msg/ZFS-<span class="number">8000</span>-<span class="number">4</span>J</span><br><span class="line">  scan: none requested</span><br><span class="line">config:</span><br><span class="line"></span><br><span class="line">        NAME                      STATE     READ WRITE CKSUM</span><br><span class="line">        tank                      DEGRADED     <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">          raidz3-<span class="number">0</span>                DEGRADED     <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdb                   ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdc                   ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdd                   ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            <span class="number">18248829720282346757</span>  FAULTED      <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span>  was /dev/sde1</span><br><span class="line">            <span class="number">3834187477602051621</span>   UNAVAIL      <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span>  was /dev/sdf1</span><br><span class="line"></span><br><span class="line">errors: No known data errors</span><br></pre></td></tr></table></figure>
+<p>stateがDEGRADEDにかわっています。一台死んでやばい状態です。<br>この状態でファイルが参照できるか確認してみます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /tank/</span><br><span class="line">$ ll</span><br><span class="line">合計 <span class="number">1044588</span></span><br><span class="line">-rw-r--r-- <span class="number">1</span> root root <span class="number">1073741824</span>  <span class="number">5</span>月 <span class="number">18</span> <span class="number">17</span>:<span class="number">19</span> bigfile</span><br></pre></td></tr></table></figure>
+<p>問題なく参照できるようです。<br>vSphereクライアントから新しいハードディスクを追加して<code>parted -l</code>を確認します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ parted <span class="operator">-l</span></span><br><span class="line">～（省略）～</span><br><span class="line">エラー: /dev/sde: ディスクラベルが認識できません。</span><br><span class="line">モデル: VMware Virtual disk (scsi)</span><br><span class="line">ディスク /dev/sde: <span class="number">8590</span>MB</span><br><span class="line">セクタサイズ (論理/物理): <span class="number">512</span>B/<span class="number">512</span>B</span><br><span class="line">パーティションテーブル: unknown</span><br><span class="line">ディスクフラグ:</span><br></pre></td></tr></table></figure>
+<p>一台フォーマットしていないディスクが見えてきました。こいつをZFSプールに参加させます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ zpool replace tank /dev/sde <span class="operator">-f</span></span><br></pre></td></tr></table></figure>
+<p>からのZFSプールの状態確認。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$ zpool status</span><br><span class="line">  pool: tank</span><br><span class="line"> state: ONLINE</span><br><span class="line">  scan: none requested</span><br><span class="line">config:</span><br><span class="line"></span><br><span class="line">        NAME        STATE     READ WRITE CKSUM</span><br><span class="line">        tank        ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">          raidz3-<span class="number">0</span>  ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdb     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdc     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdd     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sde     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br><span class="line">            sdf     ONLINE       <span class="number">0</span>     <span class="number">0</span>     <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>エラーが無くなりました。<br>パーフェクトだにゃん・・・</p>
+<h3 id="おわり">おわり</h3><p>素晴らしいZFSでした。非力なマシンだとかなりパフォーマンスが落ちるそうですが、マシンパワーに自信ニキであれば相当なパフォーマンスを発揮するそうです。耐障害性、堅牢性だけじゃなくて高速化を図るテクノロジーもいっぱい搭載してるらしい。<br>ちなみにホットスペアも検証してみました。そうしたらZFSファイルシステムが<strong><em>壊れた。</em></strong>しにてえ！以上です。</p>
+<h3 id="参考サイト様">参考サイト様</h3><blockquote>
+<p>SIOS “OSSよろず” ブログ出張所<br><a href="http://sios-oss.blogspot.jp/2012/02/zfs-on-linux1zfs-on-linux.html" target="_blank" rel="external">http://sios-oss.blogspot.jp/2012/02/zfs-on-linux1zfs-on-linux.html</a></p>
+<p>私をペロペロするがよい<br><a href="http://lazy-dog.hatenablog.com/entry/2014/08/17/033038" target="_blank" rel="external">http://lazy-dog.hatenablog.com/entry/2014/08/17/033038</a></p>
+<p>メモ帳みたいなもの<br><a href="http://nsrzakki.hateblo.jp/entry/2013/04/09/010854" target="_blank" rel="external">http://nsrzakki.hateblo.jp/entry/2013/04/09/010854</a></p>
+<p>Life with IT<br><a href="http://l-w-i.net/t/solaris/zfs_001.txt" target="_blank" rel="external">http://l-w-i.net/t/solaris/zfs_001.txt</a></p>
+<p>ADWAYS ENGINEERS BLOG<br><a href="http://blog.engineer.adways.net/archives/31692610.html" target="_blank" rel="external">http://blog.engineer.adways.net/archives/31692610.html</a></p>
+<p>[[zfs コマンド]] メモとかメモのようなものとか（By ルーキーの中のひと)<br><a href="http://wiki.rookie-inc.com/serverapps/zfs/command" target="_blank" rel="external">http://wiki.rookie-inc.com/serverapps/zfs/command</a></p>
+<p>hirotomium.com<br><a href="http://hirotomium.com/memories/2011/11/zfsreplace.php" target="_blank" rel="external">http://hirotomium.com/memories/2011/11/zfsreplace.php</a></p>
+</blockquote>
+
+      
+    </div>
+
+    <div class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/"> #Linux </a>
+          
+            <a href="/tags/RAID/"> #RAID </a>
+          
+            <a href="/tags/ZFS/"> #ZFS </a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/05/14/GitHubとHexoが火を噴いた4/">GitHubとHexoが火を噴いた(第4回)</a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </div>
+  </div>
+
+
+
+    
+      <div class="comments" id="comments">
+        
+          <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+          </div>
+        
+      </div>
+    
+  </div>
+
+
+        </div>
+      </div>
+
+      
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table Of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview">
+        <div class="site-author motion-element">
+          <img class="site-author-image" src="/images/default_avatar.png" alt="ウナギンチャク" />
+          <p class="site-author-name">ウナギンチャク</p>
+        </div>
+        <p class="site-description motion-element"></p>
+        <div class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-name">posts</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            <a href="/categories">
+              <span class="site-state-item-count">1</span>
+              <span class="site-state-item-name">categories</span>
+              </a>
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">8</span>
+              <span class="site-state-item-name">tags</span>
+              </a>
+          </div>
+
+        </div>
+
+        
+          <div class="feed-link motion-element">
+            <a href="http://pitekusu.github.io/atom.xml">
+              <i class="menu-item-icon icon-feed"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+              <a href="https://twitter.com/unagi_pi3104" target="_blank">twitter</a>
+            </span>
+            
+          
+        </div>
+
+        
+        
+
+      </div>
+
+      
+        <div class="post-toc-wrap sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#はじめに"><span class="nav-number">1.</span> <span class="nav-text">はじめに</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ZFSのすごいところ"><span class="nav-number">2.</span> <span class="nav-text">ZFSのすごいところ</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RAID-Zについて"><span class="nav-number">2.1.</span> <span class="nav-text">RAID-Zについて</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ZFS_on_Linux"><span class="nav-number">3.</span> <span class="nav-text">ZFS on Linux</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#今回の仮想マシン"><span class="nav-number">3.1.</span> <span class="nav-text">今回の仮想マシン</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ZFS_on_Linuxのインストール"><span class="nav-number">3.2.</span> <span class="nav-text">ZFS on Linuxのインストール</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ZFSプール作成"><span class="nav-number">3.3.</span> <span class="nav-text">ZFSプール作成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重複排除の威力"><span class="nav-number">3.4.</span> <span class="nav-text">重複排除の威力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ZFSスナップショット機能"><span class="nav-number">3.5.</span> <span class="nav-text">ZFSスナップショット機能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#耐障害性の実験"><span class="nav-number">3.6.</span> <span class="nav-text">耐障害性の実験</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#おわり"><span class="nav-number">3.7.</span> <span class="nav-text">おわり</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考サイト様"><span class="nav-number">3.8.</span> <span class="nav-text">参考サイト様</span></a></li></ol></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </div>
+      
+
+    </div>
+  </div>
+
+
+    </div>
+
+    <div id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy; &nbsp; 
+  2015
+  <span class="with-love">
+    <i class="icon-heart"></i>
+  </span>
+  <span class="author">ウナギンチャク</span>
+</div>
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT
+  </a>
+</div>
+
+
+
+      </div>
+    </div>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('.content img').each(function () {
+        var $image = $(this);
+        var $imageWrapLink = $image.parent('a');
+
+        if ($imageWrapLink.size() < 1) {
+          $imageWrapLink = $image.wrap('<a href="' + this.getAttribute('src') + '"></a>').parent('a');
+        }
+        $imageWrapLink.addClass('fancybox');
+      });
+    });
+    $('.fancybox').fancybox({
+      helpers: {
+        overlay: {
+          locked: false
+        }
+      }
+    });
+  </script>
+
+
+  <script type="text/javascript">
+  function hasMobileUA () {
+    var nav = window.navigator;
+    var ua = nav.userAgent;
+    var pa = /iPad|iPhone|Android|Opera Mini|BlackBerry|webOS|UCWEB|Blazer|PSP|IEMobile|Symbian/g;
+
+    return pa.test(ua);
+  }
+
+  function isDesktop () {
+    return screen.width > 991 && !hasMobileUA();
+  }
+
+  function isTablet () {
+    return screen.width < 992 && screen.width > 767 && hasMobileUA();
+  }
+
+  function isMobile () {
+    return screen.width < 767 && hasMobileUA();
+  }
+
+  function escapeSelector (selector) {
+    return selector.replace(/[!"$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&")
+  }
+</script>
+
+  
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" id="motion.global">
+  $(document).ready(function () {
+    var body = $('body');
+    var isSidebarVisible = false;
+    var sidebarToggle = $('.sidebar-toggle');
+    var sidebarToggleLine1st = $('.sidebar-toggle-line-first')
+    var sidebarToggleLine2nd = $('.sidebar-toggle-line-middle');
+    var sidebarToggleLine3rd = $('.sidebar-toggle-line-last');
+    var sidebar = $('.sidebar');
+
+    var SIDEBAR_WIDTH = '320px';
+    var SIDEBAR_DISPLAY_DURATION = 300;
+
+    var sidebarToogleLineStatusInit = {width: '100%', opacity: 1, left: 0, rotateZ: 0, top: 0};
+
+    var sidebarToggleLine1stStatusInit = sidebarToogleLineStatusInit;
+    var sidebarToggleLine1stStatusArrow = {width: '50%', rotateZ: '-45deg', top: '2px'};
+    var sidebarToogleLine1stStatusClose = {width: '100%', rotateZ: '-45deg', top: '5px'};
+
+    var sidebarToggleLine2ndStatusInit = sidebarToogleLineStatusInit;
+    var sidebarToggleLine2ndStatusArrow = {width: '90%'};
+    var sidebarToogleLine2ndStatusClose = {opacity: 0};
+
+    var sidebarToggleLine3rdStatusInit = sidebarToogleLineStatusInit;
+    var sidebarToggleLine3rdStatusArrow = {width: '50%', rotateZ: '45deg', top: '-2px'};
+    var sidebarToogleLine3rdStatusClose = {width: '100%', rotateZ: '45deg', top: '-5px'};
+
+    LogoAndMenuMotion();
+    sidebatToggleMotion();
+    postsListMotion();
+    backToTopMotion();
+
+
+    $(document)
+      .on('sidebar.isShowing', function () {
+        isDesktop() && body.velocity(
+          {paddingRight: SIDEBAR_WIDTH},
+          SIDEBAR_DISPLAY_DURATION
+        );
+        sidebarContentMotion();
+      })
+      .on('sidebar.isHiding', function () {});
+
+    function LogoAndMenuMotion() {
+      $.Velocity.RunSequence([
+        { e: $('.brand'), p: { opacity: 1 }, o: { duration: 100 } },
+        { e: $('.logo'), p: { opacity: 1, top: 0 }, o: { duration: 50} },
+        
+        { e: $('.site-title'), p: { opacity: 1, top: 0 }, o: { duration: 200 } }
+      ]);
+      $('.menu-item').velocity('transition.slideDownIn', {display: null});
+    }
+
+
+    function backToTopMotion () {
+      var b2top = $('.back-to-top');
+      b2top.on('click', function () {
+        body.velocity('scroll');
+      });
+    }
+
+    function sidebarShowMotion () {
+
+      sidebarToggleLine1st.velocity(sidebarToogleLine1stStatusClose);
+      sidebarToggleLine2nd.velocity(sidebarToogleLine2ndStatusClose);
+      sidebarToggleLine3rd.velocity(sidebarToogleLine3rdStatusClose);
+
+      sidebar.velocity({width: SIDEBAR_WIDTH}, {
+        display: 'block',
+        duration: SIDEBAR_DISPLAY_DURATION,
+        complete: function () {
+          sidebar.addClass('sidebar-active');
+          sidebar.trigger('sidebar.didShow');
+        }
+      });
+      sidebar.trigger('sidebar.isShowing');
+    }
+
+    function sidebarHideMotion () {
+      isDesktop() && body.velocity({paddingRight: 0});
+      sidebar.velocity('reverse');
+
+      sidebarToggleLine1st.velocity(sidebarToggleLine1stStatusInit);
+      sidebarToggleLine2nd.velocity(sidebarToggleLine2ndStatusInit);
+      sidebarToggleLine3rd.velocity(sidebarToggleLine3rdStatusInit);
+
+      sidebar.removeClass('sidebar-active');
+      sidebar.trigger('sidebar.isHiding');
+    };
+
+    function sidebarContentMotion () {
+      $('.sidebar .motion-element').velocity(
+        'transition.slideRightIn',
+        {stagger: 50, drag: true}
+      );
+    }
+
+    function postsListMotion () {
+      var postMotionOptions = window.postMotionOptions || {stagger: 300, drag: true};
+      $('.post').velocity('transition.slideDownIn', postMotionOptions);
+    }
+
+    function sidebatToggleMotion () {
+      sidebarToggle.on('click', function () {
+        isSidebarVisible ? sidebarHideMotion() : sidebarShowMotion();
+        isSidebarVisible = !isSidebarVisible;
+      });
+
+      sidebarToggle.hover(function () {
+        if (isSidebarVisible) {return}
+        sidebarToggleLine1st.velocity('stop').velocity(sidebarToggleLine1stStatusArrow);
+        sidebarToggleLine2nd.velocity('stop').velocity(sidebarToggleLine2ndStatusArrow);
+        sidebarToggleLine3rd.velocity('stop').velocity(sidebarToggleLine3rdStatusArrow);
+      }, function () {
+        if (isSidebarVisible) {return}
+        sidebarToggleLine1st.velocity('stop').velocity(sidebarToggleLine1stStatusInit);
+        sidebarToggleLine2nd.velocity('stop').velocity(sidebarToggleLine2ndStatusInit);
+        sidebarToggleLine3rd.velocity('stop').velocity(sidebarToggleLine3rdStatusInit);
+      });
+    }
+  });
+
+</script>
+
+
+
+
+
+  
+  
+<script type="text/javascript" id="bootstrap.scrollspy.custom">
+  /* ========================================================================
+  * Bootstrap: scrollspy.js v3.3.2
+  * http://getbootstrap.com/javascript/#scrollspy
+  * ========================================================================
+  * Copyright 2011-2015 Twitter, Inc.
+  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+  * ======================================================================== */
+
+  /**
+   * Custom by iissnan
+   *
+   * - Add a `clear.bs.scrollspy` event.
+   * - Esacpe targets selector.
+   */
+
+
+  +function ($) {
+    'use strict';
+
+    // SCROLLSPY CLASS DEFINITION
+    // ==========================
+
+    function ScrollSpy(element, options) {
+      this.$body          = $(document.body)
+      this.$scrollElement = $(element).is(document.body) ? $(window) : $(element)
+      this.options        = $.extend({}, ScrollSpy.DEFAULTS, options)
+      this.selector       = (this.options.target || '') + ' .nav li > a'
+      this.offsets        = []
+      this.targets        = []
+      this.activeTarget   = null
+      this.scrollHeight   = 0
+
+      this.$scrollElement.on('scroll.bs.scrollspy', $.proxy(this.process, this))
+      this.refresh()
+      this.process()
+    }
+
+    ScrollSpy.VERSION  = '3.3.2'
+
+    ScrollSpy.DEFAULTS = {
+      offset: 10
+    }
+
+    ScrollSpy.prototype.getScrollHeight = function () {
+      return this.$scrollElement[0].scrollHeight || Math.max(this.$body[0].scrollHeight, document.documentElement.scrollHeight)
+    }
+
+    ScrollSpy.prototype.refresh = function () {
+      var that          = this
+      var offsetMethod  = 'offset'
+      var offsetBase    = 0
+
+      this.offsets      = []
+      this.targets      = []
+      this.scrollHeight = this.getScrollHeight()
+
+      if (!$.isWindow(this.$scrollElement[0])) {
+        offsetMethod = 'position'
+        offsetBase   = this.$scrollElement.scrollTop()
+      }
+
+      this.$body
+        .find(this.selector)
+        .map(function () {
+          var $el   = $(this)
+          var href  = $el.data('target') || $el.attr('href')
+          var $href = /^#./.test(href) && $(escapeSelector(href)) // Need to escape selector.
+
+          return ($href
+            && $href.length
+            && $href.is(':visible')
+            && [[$href[offsetMethod]().top + offsetBase, href]]) || null
+        })
+        .sort(function (a, b) { return a[0] - b[0] })
+        .each(function () {
+          that.offsets.push(this[0])
+          that.targets.push(this[1])
+        })
+
+
+    }
+
+    ScrollSpy.prototype.process = function () {
+      var scrollTop    = this.$scrollElement.scrollTop() + this.options.offset
+      var scrollHeight = this.getScrollHeight()
+      var maxScroll    = this.options.offset + scrollHeight - this.$scrollElement.height()
+      var offsets      = this.offsets
+      var targets      = this.targets
+      var activeTarget = this.activeTarget
+      var i
+
+      if (this.scrollHeight != scrollHeight) {
+        this.refresh()
+      }
+
+      if (scrollTop >= maxScroll) {
+        return activeTarget != (i = targets[targets.length - 1]) && this.activate(i)
+      }
+
+      if (activeTarget && scrollTop < offsets[0]) {
+        $(this.selector).trigger('clear.bs.scrollspy')  // Add a custom event.
+        this.activeTarget = null
+        return this.clear()
+      }
+
+      for (i = offsets.length; i--;) {
+        activeTarget != targets[i]
+          && scrollTop >= offsets[i]
+          && (!offsets[i + 1] || scrollTop <= offsets[i + 1])
+          && this.activate(targets[i])
+      }
+    }
+
+    ScrollSpy.prototype.activate = function (target) {
+      this.activeTarget = target
+
+      this.clear()
+
+      var selector = this.selector +
+        '[data-target="' + target + '"],' +
+        this.selector + '[href="' + target + '"]'
+
+      var active = $(selector)
+        .parents('li')
+        .addClass('active')
+
+      if (active.parent('.dropdown-menu').length) {
+        active = active
+          .closest('li.dropdown')
+          .addClass('active')
+      }
+
+      active.trigger('activate.bs.scrollspy')
+    }
+
+    ScrollSpy.prototype.clear = function () {
+      $(this.selector)
+        .parentsUntil(this.options.target, '.active')
+        .removeClass('active')
+    }
+
+
+    // SCROLLSPY PLUGIN DEFINITION
+    // ===========================
+
+    function Plugin(option) {
+      return this.each(function () {
+        var $this   = $(this)
+        var data    = $this.data('bs.scrollspy')
+        var options = typeof option == 'object' && option
+
+        if (!data) $this.data('bs.scrollspy', (data = new ScrollSpy(this, options)))
+        if (typeof option == 'string') data[option]()
+      })
+    }
+
+    var old = $.fn.scrollspy
+
+    $.fn.scrollspy             = Plugin
+    $.fn.scrollspy.Constructor = ScrollSpy
+
+
+    // SCROLLSPY NO CONFLICT
+    // =====================
+
+    $.fn.scrollspy.noConflict = function () {
+      $.fn.scrollspy = old
+      return this
+    }
+
+
+    // SCROLLSPY DATA-API
+    // ==================
+
+    $(window).on('load.bs.scrollspy.data-api', function () {
+      $('[data-spy="scroll"]').each(function () {
+        var $spy = $(this)
+        Plugin.call($spy, $spy.data())
+      })
+    })
+
+  }(jQuery);
+</script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var $sidebarInner = $('.sidebar-inner');
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.didShow', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+          var self = this;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      $(indicator).velocity('stop').velocity({
+        opacity: action === 'show' ? 0.4 : 0
+      }, { duration: 100 });
+    }
+
+  });
+</script>
+
+
+  <script type="text/javascript" id="sidebar.nav">
+    $(document).ready(function () {
+      var html = $('html');
+
+      $('.sidebar-nav li').on('click', function () {
+        var item = $(this);
+        var activeTabClassName = 'sidebar-nav-active';
+        var activePanelClassName = 'sidebar-panel-active';
+        if (item.hasClass(activeTabClassName)) {
+          return;
+        }
+
+        var currentTarget = $('.' + activePanelClassName);
+        var target = $('.' + item.data('target'));
+
+        currentTarget.velocity('transition.slideUpOut', 200, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', 200)
+            .addClass(activePanelClassName);
+        });
+
+        item.siblings().removeClass(activeTabClassName);
+        item.addClass(activeTabClassName);
+      });
+
+      $('.post-toc a').on('click', function (e) {
+        e.preventDefault();
+        var offset = $(escapeSelector(this.getAttribute('href'))).offset().top;
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        });
+      });
+
+      // Expand sidebar on post detail page by default, when post has a toc.
+      var $tocContent = $('.post-toc-content');
+      if ($tocContent.length > 0 && $tocContent.html().trim().length > 0 && isDesktop()) {
+        setTimeout(function () {
+          $('.sidebar-toggle').trigger('click');
+        }, 800);
+      }
+    });
+  </script>
+
+
+
+
+  
+
+  
+  
+  
+
+  
+
+    
+      
+    
+
+    <script type="text/javascript">
+      var disqus_shortname = 'azunyan';
+      var disqus_identifier = '2015/05/21/ZFS on Linuxを仮想CentOS7上で検証してみた/';
+      var disqus_url = 'http://pitekusu.github.io/2015/05/21/ZFS on Linuxを仮想CentOS7上で検証してみた/';
+
+      (function(){
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      }());
+    </script>
+  
+
+
+
+
+  
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-23771506-3', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+</body>
+</html>
